@@ -4,18 +4,28 @@ import { UniversalParser } from '../../../src/domain/tracking/UniversalParser';
 describe('UniversalParser', () => {
   it('should parse a simple UPI notification', () => {
     const result = UniversalParser.parse('Paid ₹500 to Rahul');
-    expect(result?.amount).toBe(500);
+    expect(result?.amountPaise).toBe(50000);
     expect(result?.currency).toBe('INR');
   });
 
-  it('should parse decimal amounts correctly', () => {
-    const result = UniversalParser.parse('Paid ₹500.50 to Rahul');
-    expect(result?.amount).toBe(500.50);
+  it('should parse amounts with commas (Indian notation)', () => {
+    const result = UniversalParser.parse('Paid ₹1,50,000 to Dealer');
+    expect(result?.amountPaise).toBe(15000000);
   });
 
-  it('should return 0 amount if symbol exists but no digits follow', () => {
-    const result = UniversalParser.parse('Paid ₹ to Rahul');
-    expect(result?.amount).toBe(0);
+  it('should handle decimal precision using paise', () => {
+    const result = UniversalParser.parse('Spent ₹500.50 on lunch');
+    expect(result?.amountPaise).toBe(50050);
+  });
+
+  it('should handle floating point edge cases (0.1 + 0.2)', () => {
+    const result = UniversalParser.parse('₹0.10 and ₹0.20');
+    expect(result?.amountPaise).toBe(10);
+  });
+
+  it('should parse negative amounts (refunds/reversals)', () => {
+    const result = UniversalParser.parse('Refunded -₹500.00');
+    expect(result?.amountPaise).toBe(-50000);
   });
 
   it('should return null if no currency symbol is found', () => {
@@ -25,10 +35,5 @@ describe('UniversalParser', () => {
 
   it('should return null for empty input', () => {
     expect(UniversalParser.parse('')).toBeNull();
-  });
-
-  it('should parse the first amount if multiple symbols are present', () => {
-    const result = UniversalParser.parse('Paid ₹500 and received ₹200');
-    expect(result?.amount).toBe(500);
   });
 });

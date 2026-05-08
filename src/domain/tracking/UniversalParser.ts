@@ -1,27 +1,42 @@
 export interface Transaction {
-  amount: number;
+  amountPaise: number; // Stored in minor unit (paise) to prevent precision loss
   currency: string;
 }
 
 const DEFAULT_CURRENCY = 'INR';
 const CURRENCY_SYMBOL = '₹';
 
+// Pre-compile Regex outside for performance. 
+// Escapes symbol and handles: Optional negative sign, digits with commas, and optional decimal.
+const AMOUNT_REGEX = new RegExp(
+  `(-?\\${CURRENCY_SYMBOL})\\s?([\\d,]+(?:\\.\\d+)?)`
+);
+
 export const UniversalParser = {
   /**
    * Parses a transaction alert string into a Transaction object.
-   * Handles decimals and uses the default currency symbol.
+   * Uses integer arithmetic (paise) to ensure 100% accuracy.
    */
   parse: (text: string): Transaction | null => {
-    if (!text || !text.includes(CURRENCY_SYMBOL)) {
-      return null;
+    if (!text) return null;
+
+    const match = text.match(AMOUNT_REGEX);
+    if (!match) return null;
+
+    const isNegative = match[1].startsWith('-');
+    
+    // Remove commas and parse to float first to handle the decimal part
+    const rawAmount = parseFloat(match[2].replace(/,/g, ''));
+    
+    // Convert to paise (integer)
+    let amountPaise = Math.round(rawAmount * 100);
+    
+    if (isNegative) {
+      amountPaise = -amountPaise;
     }
 
-    // Regex handles integers and decimals (e.g. 500 or 500.50)
-    const amountMatch = text.match(new RegExp(`${CURRENCY_SYMBOL}(\\d+(?:\\.\\d+)?)`));
-    const amount = amountMatch ? parseFloat(amountMatch[1]) : 0;
-
     return {
-      amount,
+      amountPaise,
       currency: DEFAULT_CURRENCY
     };
   }

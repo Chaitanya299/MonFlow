@@ -1,0 +1,20 @@
+{
+  "name": "monflo",
+  "version": "0.1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "start": "react-native start"
+  },
+  "dependencies": {
+    "react": "18.3.1",
+    "react-native": "0.74.1"
+  },
+  "devDependencies": {
+    "vitest": "^1.6.0",
+    "typescript": "^5.0.0",
+    "@testing-library/react-native": "^12.5.0"
+  }
+}

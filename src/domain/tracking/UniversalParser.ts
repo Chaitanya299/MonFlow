@@ -39,5 +39,14 @@ export const UniversalParser = {
       amountPaise,
       currency: DEFAULT_CURRENCY
     };
+  },
+
+  /**
+   * Checks if a string contains promotional keywords.
+   */
+  isPromotional: (text: string): boolean => {
+    const PROMO_KEYWORDS = ["offer", "reward", "cashback", "win", "discount", "congratulations"];
+    const lowerText = text.toLowerCase();
+    return PROMO_KEYWORDS.some(keyword => lowerText.includes(keyword));
   }
 };

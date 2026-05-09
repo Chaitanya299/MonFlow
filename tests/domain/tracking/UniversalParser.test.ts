@@ -36,4 +36,17 @@ describe('UniversalParser', () => {
   it('should return null for empty input', () => {
     expect(UniversalParser.parse('')).toBeNull();
   });
+
+  describe('isPromotional', () => {
+    it('should return true for messages containing promotional keywords', () => {
+      expect(UniversalParser.isPromotional('Congratulations! You won cashback.')).toBe(true);
+      expect(UniversalParser.isPromotional('Get 20% discount on your next order.')).toBe(true);
+      expect(UniversalParser.isPromotional('Special reward for you.')).toBe(true);
+    });
+
+    it('should return false for standard transaction messages', () => {
+      expect(UniversalParser.isPromotional('Paid ₹500 to Rahul')).toBe(false);
+      expect(UniversalParser.isPromotional('₹150 debited from a/c')).toBe(false);
+    });
+  });
 });

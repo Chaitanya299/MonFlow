@@ -1,5 +1,6 @@
 package com.monflo.tracking
 
+import android.content.Intent
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import kotlinx.coroutines.CoroutineScope
@@ -8,6 +9,12 @@ import kotlinx.coroutines.launch
 
 class MonfloNotificationService : NotificationListenerService() {
     private val scope = CoroutineScope(Dispatchers.IO)
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        NotificationHelper.createNotificationChannel(this)
+        startForeground(1, NotificationHelper.buildNotification(this))
+        return START_STICKY
+    }
 
     private val allowlist = setOf(
         "com.google.android.apps.nbu.paisa", // GPay

@@ -1,6 +1,7 @@
 package com.monflo.tracking
 
 import android.content.Context
+import android.content.Intent
 import com.facebook.react.bridge.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -70,5 +71,25 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     fun isVaultInitialized(promise: Promise) {
         val prefs = reactApplicationContext.getSharedPreferences("monflo_vault_prefs", Context.MODE_PRIVATE)
         promise.resolve(prefs.contains("enc_entropy"))
+    }
+
+    @ReactMethod
+    fun setTrackingEnabled(enabled: Boolean, promise: Promise) {
+        val prefs = reactApplicationContext.getSharedPreferences("monflo_tracking_prefs", Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("isTrackingEnabled", enabled).apply()
+
+        val intent = Intent(reactApplicationContext, MonfloNotificationService::class.java)
+        if (enabled) {
+            reactApplicationContext.startForegroundService(intent)
+        } else {
+            reactApplicationContext.stopService(intent)
+        }
+        promise.resolve(enabled)
+    }
+
+    @ReactMethod
+    fun isTrackingEnabled(promise: Promise) {
+        val prefs = reactApplicationContext.getSharedPreferences("monflo_tracking_prefs", Context.MODE_PRIVATE)
+        promise.resolve(prefs.getBoolean("isTrackingEnabled", false))
     }
 }

@@ -16,8 +16,7 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     fun getPendingAlerts(promise: Promise) {
         scope.launch {
             try {
-                val passphrase = "prototype_key".toByteArray()
-                val database = NativeDatabase.getInstance(reactApplicationContext, passphrase)
+                val database = NativeDatabase.getInstance(reactApplicationContext)
                 val alerts = database.rawAlertDao().getAll()
 
                 val result = Arguments.createArray()
@@ -40,8 +39,7 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     fun clearProcessedAlerts(ids: ReadableArray, promise: Promise) {
         scope.launch {
             try {
-                val passphrase = "prototype_key".toByteArray()
-                val database = NativeDatabase.getInstance(reactApplicationContext, passphrase)
+                val database = NativeDatabase.getInstance(reactApplicationContext)
                 val idList = mutableListOf<Int>()
                 for (i in 0 until ids.size()) {
                     idList.add(ids.getInt(i))

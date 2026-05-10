@@ -13,8 +13,10 @@ abstract class NativeDatabase : RoomDatabase() {
     companion object {
         private var INSTANCE: NativeDatabase? = null
 
-        fun getInstance(context: Context, passphrase: ByteArray): NativeDatabase {
+        fun getInstance(context: Context): NativeDatabase {
             return INSTANCE ?: synchronized(this) {
+                val vaultManager = VaultManager(context)
+                val passphrase = vaultManager.getDatabasePassphrase()
                 val factory = SupportOpenHelperFactory(passphrase)
                 val instance = Room.databaseBuilder(
                     context.applicationContext,

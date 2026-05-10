@@ -26,9 +26,7 @@ class MonfloNotificationService : NotificationListenerService() {
 
     private fun saveToVault(text: String, pkg: String) {
         scope.launch {
-            // Placeholder passphrase for prototype phase
-            val passphrase = "prototype_key".toByteArray()
-            val database = NativeDatabase.getInstance(applicationContext, passphrase)
+            val database = NativeDatabase.getInstance(applicationContext)
             val alert = RawAlert(
                 rawText = text,
                 packageName = pkg,

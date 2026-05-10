@@ -1,5 +1,6 @@
 package com.monflo.tracking
 
+import android.content.Context
 import com.facebook.react.bridge.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,5 +51,24 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
                 promise.reject("DB_ERROR", e.message)
             }
         }
+    }
+
+    @ReactMethod
+    fun initializeVault(promise: Promise) {
+        try {
+            val manager = VaultManager(reactApplicationContext)
+            val mnemonic = manager.initializeNewVault()
+            val result = Arguments.createArray()
+            mnemonic.forEach { result.pushString(it) }
+            promise.resolve(result)
+        } catch (e: Exception) {
+            promise.reject("VAULT_INIT_ERROR", e.message)
+        }
+    }
+
+    @ReactMethod
+    fun isVaultInitialized(promise: Promise) {
+        val prefs = reactApplicationContext.getSharedPreferences("monflo_vault_prefs", Context.MODE_PRIVATE)
+        promise.resolve(prefs.contains("enc_entropy"))
     }
 }

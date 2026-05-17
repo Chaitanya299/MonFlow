@@ -1,0 +1,8 @@
+{
+  "category": "hdfc",
+  "input": "Sent Rs.60.00\nFrom HDFC Bank A/C *6084\nTo BANDLAMUDI ANUSHA\nOn 14/05/26\nRef 650012723604\nNot You?\nCall 18002586161/SMS BLOCK UPI to 7308080808",
+  "expected": {
+    "amount": 6000,
+    "currency": "INR"
+  }
+}

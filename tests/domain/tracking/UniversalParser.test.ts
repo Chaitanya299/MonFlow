@@ -192,4 +192,101 @@ describe('UniversalParser', () => {
       expect(UniversalParser.isPromotional('A/C *1234 debited ₹999 on 14-May')).toBe(false);
     });
   });
+
+  describe('parse — real-life user messages', () => {
+    it('should parse ICICI Bank debit with credited beneficiary (correctly identified as debit)', () => {
+      const msg = 'ICICI Bank Acct XX041 debited for Rs 75.00 on 15-May-26; SHAIK IMRAN AHM credited. UPI:737761560069. Call 18002662 for dispute. SMS BLOCK 041 to 9215676766';
+      const result = UniversalParser.parse(msg);
+      expect(result).not.toBeNull();
+      expect(result!.amountPaise).toBe(7500);
+    });
+
+    it('should parse ICICI Bank credit', () => {
+      const msg = 'Dear Customer, Acct XX041 is credited with Rs 1760.00 on 13-May-26 from TULALA HARSHA G. UPI:123337608996-ICICI Bank.';
+      const result = UniversalParser.parse(msg);
+      expect(result).not.toBeNull();
+      expect(result!.amountPaise).toBe(-176000);
+    });
+
+    it('should parse SBI debit without currency symbol', () => {
+      const msg = 'Dear UPI user A/C X6090 debited by 15.00 on date 03Apr26 trf to AVENUE FOOD PLAZ Refno 830400847000 If not u? call-1800111109 for other services-18001234-SBI';
+      const result = UniversalParser.parse(msg);
+      expect(result).not.toBeNull();
+      expect(result!.amountPaise).toBe(1500);
+    });
+
+    it('should parse HSBC debit with typo "NR"', () => {
+      const msg = 'NR 1000.00 is paid from HSBC account XXXXXX1006 to BEHERA TATHAGAT on 11-May-26 with ref 613101256215.';
+      const result = UniversalParser.parse(msg);
+      expect(result).not.toBeNull();
+      expect(result!.amountPaise).toBe(100000);
+    });
+
+    it('should parse HSBC debit', () => {
+      const msg = 'INR 1140.00 is paid from HSBC account XXXXXX1006 to Yum Yum Tree Arabian Food Court on 08-May-26 with ref 275210596918.';
+      const result = UniversalParser.parse(msg);
+      expect(result).not.toBeNull();
+      expect(result!.amountPaise).toBe(114000);
+    });
+
+    it('should parse Union Bank debit with colon "Rs:"', () => {
+      const msg = 'A/c *1114 Debited for Rs:500.00 on 13-05-2026 17:05:09 by Mob Bk ref no 709515471120 Avl Bal Rs:20.55.';
+      const result = UniversalParser.parse(msg);
+      expect(result).not.toBeNull();
+      expect(result!.amountPaise).toBe(50000);
+    });
+
+    it('should parse HDFC Sent UPI debit', () => {
+      const msg = 'Sent Rs.200.00\nFrom HDFC Bank A/C *6084\nTo Zepto\nOn 16/05/26\nRef 134956946180';
+      const result = UniversalParser.parse(msg);
+      expect(result).not.toBeNull();
+      expect(result!.amountPaise).toBe(20000);
+    });
+
+    it('should parse HDFC Credit Alert', () => {
+      const msg = 'Credit Alert!\nRs.702.00 credited to HDFC Bank A/c XX6084 on 13-05-26 from VPA 8639853866@axl (UPI 863660968463)';
+      const result = UniversalParser.parse(msg);
+      expect(result).not.toBeNull();
+      expect(result!.amountPaise).toBe(-70200);
+    });
+
+    it('should parse YES Bank Credit Card Statement (total due)', () => {
+      const msg = 'YES BANK Credit Card XX7615 MAY-26 statement: Total due INR 5239.00  Min due INR 200.00 Due by 03-JUN-2026.';
+      const result = UniversalParser.parse(msg);
+      expect(result).not.toBeNull();
+      expect(result!.amountPaise).toBe(523900);
+    });
+
+    it('should parse YES Bank Card Spend', () => {
+      const msg = 'INR 1,166.00 spent on YES BANK Card X7615 @TATAUNISTORELTD 13-05-2026 10:40:51 pm. Avl Lmt INR 246,439.00.';
+      const result = UniversalParser.parse(msg);
+      expect(result).not.toBeNull();
+      expect(result!.amountPaise).toBe(116600);
+    });
+
+    it('should parse KVB debit', () => {
+      const msg = 'Your a/c XXXXXXXXXXXX4430 is debited Rs. 1450.00 on 16-May-2026 to GUDLA  AMMAJAMMA info :P2A/650247179317. Avl Bal INR 7255.11 Not You? call 18005721916-KVB';
+      const result = UniversalParser.parse(msg);
+      expect(result).not.toBeNull();
+      expect(result!.amountPaise).toBe(145000);
+    });
+
+    it('should ignore KVB Balance Alert', () => {
+      const msg = 'KVB ALERT * INR 8,705.11 is the Balance in a/c **4430 as of 16-MAY-2026 00:55:03 * Download KVB-DLite mobile app';
+      const result = UniversalParser.parse(msg);
+      expect(result).toBeNull();
+    });
+
+    it('should handle registration info alert (ignored)', () => {
+      const msg = 'Dear Customer, registration for SUPERMONEY has started for YES BANK. If it was not you, report to your bank.';
+      const result = UniversalParser.parse(msg);
+      expect(result).toBeNull();
+    });
+
+    it('should handle limit warnings (ignored)', () => {
+      const msg = 'Dear Customer, a cooling period limit of Rs. 5000 every 24 hours is applicable for the first 72 hours. Never share UPI PIN';
+      const result = UniversalParser.parse(msg);
+      expect(result).toBeNull();
+    });
+  });
 });

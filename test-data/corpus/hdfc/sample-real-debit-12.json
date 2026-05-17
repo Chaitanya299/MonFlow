@@ -1,0 +1,8 @@
+{
+  "category": "hdfc",
+  "input": "Sent Rs.194.00\nFrom HDFC Bank A/C *6084\nTo Amazon Pay Groceries\nOn 14/05/26\nRef 613430358001\nNot You?\nCall 18002586161/SMS BLOCK UPI to 7308080808",
+  "expected": {
+    "amount": 19400,
+    "currency": "INR"
+  }
+}

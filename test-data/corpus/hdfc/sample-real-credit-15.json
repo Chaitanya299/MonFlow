@@ -1,0 +1,8 @@
+{
+  "category": "hdfc",
+  "input": "Credit Alert!\nRs.1750.00 credited to HDFC Bank A/c XX6084 on 13-05-26 from VPA 7893725627@ybl (UPI 264361623496)",
+  "expected": {
+    "amount": -175000,
+    "currency": "INR"
+  }
+}

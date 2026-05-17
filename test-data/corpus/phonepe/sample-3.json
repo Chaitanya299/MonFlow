@@ -1,0 +1,8 @@
+{
+  "category": "phonepe",
+  "input": "Payment of ₹500 to Swiggy successful",
+  "expected": {
+    "amount": 50000,
+    "currency": "INR"
+  }
+}

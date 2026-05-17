@@ -1,0 +1,8 @@
+{
+  "category": "icici",
+  "input": "ICICI Bank Acct XX041 debited for Rs 75.00 on 15-May-26; SHAIK IMRAN AHM credited. UPI:737761560069. Call 18002662 for dispute. SMS BLOCK 041 to 9215676766",
+  "expected": {
+    "amount": 7500,
+    "currency": "INR"
+  }
+}

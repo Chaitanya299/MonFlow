@@ -1,0 +1,8 @@
+{
+  "category": "sbi",
+  "input": "Dear UPI user A/C X6090 debited by 15.00 on date 03Apr26 trf to AVENUE FOOD PLAZ Refno 830400847000 If not u? call-1800111109 for other services-18001234-SBI",
+  "expected": {
+    "amount": 1500,
+    "currency": "INR"
+  }
+}

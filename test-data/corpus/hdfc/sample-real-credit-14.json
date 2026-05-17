@@ -1,0 +1,8 @@
+{
+  "category": "hdfc",
+  "input": "Credit Alert!\nRs.702.00 credited to HDFC Bank A/c XX6084 on 13-05-26 from VPA 8639853866@axl (UPI 863660968463)",
+  "expected": {
+    "amount": -70200,
+    "currency": "INR"
+  }
+}

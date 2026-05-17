@@ -1,0 +1,8 @@
+{
+  "category": "hsbc",
+  "input": "INR 1570.00 is paid from HSBC account XXXXXX1006 to TULALA HARSHA GUNA on 13-May-26 with ref 471067860684. If this is not done by you, call 18002673456 to report.",
+  "expected": {
+    "amount": 157000,
+    "currency": "INR"
+  }
+}

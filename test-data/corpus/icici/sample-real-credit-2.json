@@ -1,0 +1,8 @@
+{
+  "category": "icici",
+  "input": "Dear Customer, Acct XX041 is credited with Rs 1760.00 on 13-May-26 from TULALA HARSHA G. UPI:123337608996-ICICI Bank.",
+  "expected": {
+    "amount": -176000,
+    "currency": "INR"
+  }
+}

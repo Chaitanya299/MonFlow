@@ -1,0 +1,8 @@
+{
+  "category": "hdfc",
+  "input": "Rs.1,200.00 debited from A/c XX4512 on 16-MAY-26 to User. Info: UPI-SWIGGY.",
+  "expected": {
+    "amount": 120000,
+    "currency": "INR"
+  }
+}

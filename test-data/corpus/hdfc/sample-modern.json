@@ -1,0 +1,9 @@
+{
+  "category": "hdfc",
+  "sourcePackage": "sms:VM-HDFCBK-T",
+  "input": "HDFC Bank: Rs.5400.50 debited from A/c XX1234 on 2026-05-16. Info: Amazon Pay.",
+  "expected": {
+    "amount": 540050,
+    "currency": "INR"
+  }
+}

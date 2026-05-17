@@ -1,0 +1,8 @@
+{
+  "category": "gpay",
+  "input": "₹200 received from User",
+  "expected": {
+    "amount": -20000,
+    "currency": "INR"
+  }
+}

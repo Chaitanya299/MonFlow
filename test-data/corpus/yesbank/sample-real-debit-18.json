@@ -1,0 +1,8 @@
+{
+  "category": "yesbank",
+  "input": "INR 1,166.00 spent on YES BANK Card X7615 @TATAUNISTORELTD 13-05-2026 10:40:51 pm. Avl Lmt INR 246,439.00. SMS BLKCC 7615 to 9840909000 if not you",
+  "expected": {
+    "amount": 116600,
+    "currency": "INR"
+  }
+}

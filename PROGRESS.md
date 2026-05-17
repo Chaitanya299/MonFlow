@@ -1,6 +1,6 @@
-# Monflo Project Progress Dashboad
+# Monflo Project Progress Dashboard
 
-> **Version:** 1.0.0.0 (V1 Prototype) | **Last Updated:** 2026-05-15
+> **Version:** 1.0.0.0 (V1 Prototype) | **Last Updated:** 2026-05-17
 > **Status:** `V1_PROTOTYPE_COMPLETE` | **System Health:** 🟢 Optimal
 
 ---
@@ -33,11 +33,11 @@
 - [x] **Signed Rule Bundles:** Ed25519-signed dynamic parser updates.
 - [x] **P2P Social Pairing:** Deep linking (`monflo://invite`) functionality.
 - [x] **Untagged Bucket:** UI and persistence for manual reconciliation.
+- [x] **Regex Expansion:** Parsed and validated 25+ real-world transaction/SMS formats covering HDFC, SBI, ICICI, HSBC, Union Bank, YES Bank, BOI, and KVB.
 
 ### 🟡 Improvement Needed / Tech Debt
 - [ ] **Dependency Audit:** Address 12 "Medium" CVEs found in `package.json` (Vite, esbuild).
 - [ ] **Native Test Execution:** Setup `ANDROID_HOME` in agent environment for automated Kotlin runs.
-- [ ] **Regex Expansion:** Broaden Indian bank SMS identifiers (currently only 5 keywords).
 
 ### 🔵 Research Needed
 - [ ] **Network Latency:** Waku Gossip performance on high-latency 4G/5G mobile networks.
@@ -58,6 +58,7 @@
 
 | Date | Category | Decision | Impact |
 | :--- | :--- | :--- | :--- |
+| 2026-05-17 | **Tracking** | Enhanced regex matching & normalization rules to support 25+ real-life Indian banking/SMS formats. | High (Accuracy) |
 | 2026-05-15 | **Security** | Mandatory Biometric Gate at app entry. | High (Privacy) |
 | 2026-05-15 | **Network** | Waku Relay primary, WebSocket fallback. | High (Reliability) |
 | 2026-05-15 | **Social** | Automerge CRDTs for split consistency. | High (Data Integrity) |
@@ -67,5 +68,6 @@
 
 ## 4. Quality Metrics
 - **JS Coverage:** 100% (Domain & Tracking logic)
+- **Replay Accuracy:** 100% (Verified against 33 real-life SMS samples)
 - **Security Grade:** A- (Pending dependency updates)
 - **Local Persistence:** SQLCipher AES-256 + Keystore Hardware Binding

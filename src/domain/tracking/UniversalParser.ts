@@ -16,6 +16,22 @@ const DEFAULT_AMOUNT_REGEX = new RegExp(
   `(-?\\${CURRENCY_SYMBOL}-?)\\s?([\\d,]+(?:\\.\\d+)?)`
 );
 
+const NO_SYMBOL_PATTERNS = [
+  /debited\s+by\s+([\d,]+(?:\.\d+)?)/i,
+  /credited\s+with\s+([\d,]+(?:\.\d+)?)/i,
+  /paid\s+([\d,]+(?:\.\d+)?)/i,
+  /spent\s+([\d,]+(?:\.\d+)?)/i,
+  /sent\s+([\d,]+(?:\.\d+)?)/i
+];
+
+const NON_TRANSACTION_KEYWORDS = [
+  'cooling period',
+  'limit of',
+  'registration for',
+  'is the balance',
+  'balance in a/c'
+];
+
 export const UniversalParser = {
   /**
    * Analyzes the TRAI SMS header for security verification.
@@ -50,8 +66,7 @@ export const UniversalParser = {
    */
   normalize: (text: string): string => {
     return text
-      .replace(/INR\s?/gi, CURRENCY_SYMBOL)
-      .replace(/Rs\.?\s?/gi, CURRENCY_SYMBOL)
+      .replace(/(\b(INR|Rs|NR))\.?\s?:?\s?/gi, CURRENCY_SYMBOL)
       .replace(/\s+/g, ' ')
       .trim();
   },
@@ -61,8 +76,23 @@ export const UniversalParser = {
    * or a debit (positive amount).
    */
   isCredit: (text: string): boolean => {
-    const CREDIT_KEYWORDS = ['received', 'credited', 'refunded', 'reversal'];
     const lowerText = text.toLowerCase();
+
+    // If it contains strong debit indicators, it's a debit (expense),
+    // unless it specifically says "credited to" or "credited with".
+    if (
+      lowerText.includes('debited') ||
+      lowerText.includes('paid') ||
+      lowerText.includes('spent') ||
+      lowerText.includes('sent')
+    ) {
+      if (lowerText.includes('credited to') || lowerText.includes('credited with')) {
+        return true;
+      }
+      return false;
+    }
+
+    const CREDIT_KEYWORDS = ['received', 'credited', 'refunded', 'reversal'];
     return CREDIT_KEYWORDS.some(kw => lowerText.includes(kw));
   },
 
@@ -72,6 +102,11 @@ export const UniversalParser = {
    */
   parse: (text: string, sourcePackage: string = 'app'): Transaction | null => {
     if (!text) return null;
+
+    const lowerText = text.toLowerCase();
+    if (NON_TRANSACTION_KEYWORDS.some(kw => lowerText.includes(kw))) {
+      return null;
+    }
 
     const normalizedText = UniversalParser.normalize(text);
     const metadata = UniversalParser.getSmsMetadata(sourcePackage);
@@ -91,7 +126,21 @@ export const UniversalParser = {
     }
 
     // Fallback to default regex
-    const match = normalizedText.match(DEFAULT_AMOUNT_REGEX);
+    let match = normalizedText.match(DEFAULT_AMOUNT_REGEX);
+    if (!match) {
+      const isBankSms = /a\/c|acct|account|bank|ref\s*no|refno|trf|upi/i.test(normalizedText);
+      if (isBankSms) {
+        // Try patterns without currency symbol
+        for (const pattern of NO_SYMBOL_PATTERNS) {
+          const noSymbolMatch = normalizedText.match(pattern);
+          if (noSymbolMatch) {
+            match = [noSymbolMatch[0], CURRENCY_SYMBOL, noSymbolMatch[1]] as RegExpMatchArray;
+            break;
+          }
+        }
+      }
+    }
+
     if (!match) return null;
 
     return UniversalParser.extractFromMatch(match, normalizedText, metadata.trust);

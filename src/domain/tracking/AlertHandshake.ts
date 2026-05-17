@@ -1,7 +1,10 @@
 import { NativeModules } from 'react-native';
 import { UniversalParser } from './UniversalParser';
+import { NativeAccountingRepository } from '../accounting/NativeAccountingRepository';
+import { ProcessedTransaction } from '../accounting/types';
 
 const { MonfloBridge } = NativeModules;
+const repository = new NativeAccountingRepository();
 
 export interface RawAlert {
   id: number;
@@ -27,10 +30,25 @@ export const runHandshake = async () => {
     const processedIds: number[] = [];
 
     for (const alert of alerts) {
-      if (!UniversalParser.isPromotional(alert.rawText)) {
-        const tx = UniversalParser.parse(alert.rawText);
+      if (!UniversalParser.isPromotional(alert.rawText, alert.packageName)) {
+        const tx = UniversalParser.parse(alert.rawText, alert.packageName);
         if (tx) {
-          // TODO: Integrate with AccountingRepository in Task 6
+          const processedTx: ProcessedTransaction = {
+            id: `tx_${Date.now()}_${alert.id}`,
+            amountPaise: tx.amountPaise,
+            currency: tx.currency,
+            trustLevel: tx.trustLevel,
+            merchantName: null, // To be refined by merchant detector in future
+            category: 'untagged',
+            tags: [],
+            sourcePackage: alert.packageName,
+            rawText: alert.rawText,
+            timestamp: alert.timestamp,
+            isSplit: false,
+            splitGroupId: null
+          };
+
+          await repository.save(processedTx);
           console.log(`Parsed transaction: ${tx.amountPaise} ${tx.currency}`);
         }
       }

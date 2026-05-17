@@ -1,0 +1,73 @@
+<h2>Foreground Service Persistence</h2>
+<p class="subtitle">Ensuring "Always-On" magic for Monflo</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Foreground Service Lifecycle</div>
+    <div class="mockup-body">
+      <div class="section">
+        <div class="label">Behavior</div>
+        <p>Promoting the listener to a <b>Foreground Service</b> prevents Android from killing it to save battery.</p>
+      </div>
+      <div class="section">
+        <div class="label">Auto-Start</div>
+        <p>We can implement a <code>RECEIVE_BOOT_COMPLETED</code> listener so the tracking starts automatically when the user restarts their phone.</p>
+      </div>
+      <div class="mock-nav">
+        <span class="label">Status Bar Presence</span>
+      </div>
+      <div class="placeholder" style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:24px;">🛡️</span>
+        <div>
+          <p style="font-weight:bold; margin:0;">Monflo Active</p>
+          <p style="font-size:12px; color:#666; margin:0;">Protecting your financial privacy locally.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">Clarifying Questions</div>
+    <div class="mockup-body">
+      <div class="section">
+        <p>1. Should the service <b>Auto-Start</b> on device boot?</p>
+        <div class="options" id="boot-choice">
+          <div class="option" data-choice="boot-yes" onclick="toggleSelect(this)">
+            <div class="letter">A</div>
+            <div class="content">
+              <h3>Yes (Recommended)</h3>
+              <p>Start tracking immediately after reboot.</p>
+            </div>
+          </div>
+          <div class="option" data-choice="boot-no" onclick="toggleSelect(this)">
+            <div class="letter">B</div>
+            <div class="content">
+              <h3>No</h3>
+              <p>User must manually open the app once.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <p>2. What should the persistent notification text be?</p>
+        <div class="options" id="text-choice">
+          <div class="option" data-choice="text-secure" onclick="toggleSelect(this)">
+            <div class="letter">A</div>
+            <div class="content">
+              <h3>"Monflo is Active"</h3>
+              <p>Clear, direct, and functional.</p>
+            </div>
+          </div>
+          <div class="option" data-choice="text-privacy" onclick="toggleSelect(this)">
+            <div class="letter">B</div>
+            <div class="content">
+              <h3>"Privacy Shield Enabled"</h3>
+              <p>Focuses on the security benefit.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

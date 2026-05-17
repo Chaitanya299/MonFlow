@@ -14,4 +14,7 @@ interface RawAlertDao {
 
     @Query("DELETE FROM raw_alerts WHERE id IN (:ids)")
     fun deleteByIds(ids: List<Int>)
+
+    @Query("SELECT COUNT(*) FROM raw_alerts WHERE rawText = :text AND timestamp > :sinceMs")
+    fun countSimilar(text: String, sinceMs: Long): Int
 }

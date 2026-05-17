@@ -13,7 +13,7 @@ A high-reliability Android background service for real-time capture of UPI (GPay
 - **Role:** Extends Android's `NotificationListenerService`.
 - **Filtering:** 
     - Package Name Allowlist: `com.google.android.apps.nbu.paisa` (GPay), `com.phonepe.app`, `com.paytm.app`.
-    - Content Validation: Minimum text length check to avoid noise.
+    - Content Validation: Minimum text length check (5+ characters) to avoid noise.
 - **Persistence:** Promoted to a **Foreground Service** with a subtle status bar icon to prevent OS termination.
 
 ### 2.2 Native Vault (Room DB)
@@ -26,6 +26,7 @@ A high-reliability Android background service for real-time capture of UPI (GPay
 
 ### 2.3 MonfloBridge (Native Module)
 - **Role:** Facilitates batch data transfer to React Native.
+- **Integrity:** Implements local **Ed25519** signature verification for remote rule updates.
 - **Methods:**
     - `getPendingAlerts()`: Returns a JSON array of all unparsed alerts.
     - `deleteAlerts(ids: Int[])`: Clears the "Inbox" after successful JS parsing.

@@ -1,0 +1,83 @@
+<h2>Hardware-Backed Security Architecture</h2>
+<p class="subtitle">Comparing current prototype vs. production-grade vault</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Current: Prototype (Low Security)</div>
+    <div class="mockup-body">
+      <div class="section">
+        <div class="label">Key Storage</div>
+        <p><b>Hardcoded:</b> "prototype_key"</p>
+      </div>
+      <div class="section">
+        <div class="label">Flow</div>
+        <pre>
+[Service]
+   |
+   +--> Database(passphrase="prototype_key")
+        </pre>
+      </div>
+      <div class="pros-cons">
+        <div class="cons">
+          <h4>Risks</h4>
+          <ul>
+            <li>Passphrase stored in APK</li>
+            <li>Vulnerable to static analysis</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">Proposed: Vault-Grade (High Security)</div>
+    <div class="mockup-body">
+      <div class="section">
+        <div class="label">Key Storage</div>
+        <p><b>Android Keystore:</b> Hardware-protected</p>
+      </div>
+      <div class="section">
+        <div class="label">Flow</div>
+        <pre>
+[Service]
+   |
+   +--> KeystoreManager.getOrGenerateKey()
+   |      |
+   |      +--> [TEE / Secure Element]
+   |
+   +--> Database(passphrase=derived_key)
+        </pre>
+      </div>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Benefits</h4>
+          <ul>
+            <li>Key never leaves hardware</li>
+            <li>Encrypted even on rooted devices</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Clarifying Question</h3>
+  <p>To implement this, we need to decide how to handle the <b>First Launch</b>. If no key exists in the Keystore, should we:</p>
+  <div class="options">
+    <div class="option" data-choice="auto" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>Auto-Generate</h3>
+        <p>App generates a random 256-bit key on first run silently.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="user" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>User-Passphrase</h3>
+        <p>User creates a PIN/Password, which is then used to wrap the hardware key.</p>
+      </div>
+    </div>
+  </div>
+</div>

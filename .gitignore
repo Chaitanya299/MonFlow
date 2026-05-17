@@ -1,0 +1,9 @@
+node_modules
+ruvector.db
+*.db
+.DS_Store
+**/.DS_Store
+.gradle/
+build/
+local.properties
+

@@ -1,0 +1,71 @@
+<h2>Biometric & Background Flow</h2>
+<p class="subtitle">Deciding how "Deep" the locking goes</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Option A: Transparent Tracking (Recommended)</div>
+    <div class="mockup-body">
+      <div class="section">
+        <div class="label">Background</div>
+        <p>Service uses Keystore key <b>without</b> user interaction to save alerts.</p>
+      </div>
+      <div class="section">
+        <div class="label">UI Access</div>
+        <p>App requires Biometrics to <b>see</b> the charts or ledger.</p>
+      </div>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Background tracking always works</li>
+            <li>No missed transactions</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">Option B: Cold Vault (Max Privacy)</div>
+    <div class="mockup-body">
+      <div class="section">
+        <div class="label">Background</div>
+        <p>Database is <b>locked</b>. Alerts are buffered in RAM until user unlocks.</p>
+      </div>
+      <div class="section">
+        <div class="label">UI Access</div>
+        <p>User must authenticate with Fingerprint/Face to <b>start</b> the app.</p>
+      </div>
+      <div class="pros-cons">
+        <div class="cons">
+          <h4>Risks</h4>
+          <ul>
+            <li>Data lost if phone reboots before unlock</li>
+            <li>RAM buffer limit risk</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Clarifying Question</h3>
+  <p>Should the tracking service have background access to the vault?</p>
+  <div class="options">
+    <div class="option" data-choice="transparent" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>Transparent Tracking</h3>
+        <p>Track in background silently; Biometric lock for UI only.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="cold" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>Cold Vault</h3>
+        <p>DB remains locked until the user physically unlocks the app.</p>
+      </div>
+    </div>
+  </div>
+</div>

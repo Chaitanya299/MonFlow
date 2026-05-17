@@ -1,0 +1,40 @@
+<!-- filename: approaches.html -->
+<h2>SQLCipher & Keystore Implementation Approaches</h2>
+<p class="subtitle">Ensuring "Extreme Privacy" for the Monflo Vault</p>
+
+<div class="cards">
+  <div class="card" data-choice="sovereign-derivation" onclick="toggleSelect(this)">
+    <div class="card-body">
+      <h3>Approach 1: Sovereign Key Derivation (Recommended)</h3>
+      <p>The 12-word seed is the master entropy. On first launch, we generate it, then use <b>PBKDF2</b> (Password-Based Key Derivation Function 2) with hardware-backed salt to derive the SQLCipher passphrase.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <ul>
+            <li>Mathematical proof of "Extreme Privacy"</li>
+            <li>Same 12 words work for Google Drive backup decryption</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="keystore-primary" onclick="toggleSelect(this)">
+    <div class="card-body">
+      <h3>Approach 2: Keystore-Primary with Seed Backup</h3>
+      <p>The Keystore generates a random key (unrelated to the seed). The 12-word seed is used only to "Re-generate" the same key on a new phone via a private recovery protocol.</p>
+      <div class="pros-cons">
+        <div class="cons">
+          <ul>
+            <li>More complex logic for key recovery</li>
+            <li>Keystore key is more "isolated" from the seed</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>My Recommendation</h3>
+  <p><b>Approach 1: Sovereign Derivation</b> is the cleanest and most "Industry Level" path. It turns the 12-word phrase into the user's ultimate "Financial Identity." If they have the words, they have the vault—regardless of the phone hardware.</p>
+</div>

@@ -1,0 +1,68 @@
+<h2>CRDT P2P Sync Architecture</h2>
+<p class="subtitle">Ensuring "Extreme Privacy" for global bill splitting</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">E2EE P2P Sync Flow</div>
+    <div class="mockup-body">
+      <div class="section">
+        <div class="label">Transport</div>
+        <p>User A and User B exchange <b>Encrypted CRDT Operations</b> through a "Blind" Relay.</p>
+      </div>
+      <pre>
+[User A] --(AES-256)--> [Relay] --(AES-256)--> [User B]
+   ^                                              |
+   +---------------(CRDT Merge)------------------+
+      </pre>
+      <div class="section">
+        <div class="label">Privacy Guarantee</div>
+        <p>The Relay never sees the content (debts, names, amounts). It only sees encrypted noise.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">Clarifying Questions</div>
+    <div class="mockup-body">
+      <div class="section">
+        <p>1. Which <b>Relay Strategy</b> should we use?</p>
+        <div class="options">
+          <div class="option" data-choice="waku" onclick="toggleSelect(this)">
+            <div class="letter">A</div>
+            <div class="content">
+              <h3>Public P2P (Waku)</h3>
+              <p>Zero maintenance. Uses an existing decentralized network for messaging.</p>
+            </div>
+          </div>
+          <div class="option" data-choice="private" onclick="toggleSelect(this)">
+            <div class="letter">B</div>
+            <div class="content">
+              <h3>Private Relay</h3>
+              <p>We host a simple WebSocket relay. More control and lower latency.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <p>2. How should we handle <b>Identity Verification</b>?</p>
+        <div class="options">
+          <div class="option" data-choice="tofu" onclick="toggleSelect(this)">
+            <div class="letter">A</div>
+            <div class="content">
+              <h3>Trust-on-First-Use</h3>
+              <p>Seamless: you click a link and you're connected. Safe for most bachelors.</p>
+            </div>
+          </div>
+          <div class="option" data-choice="manual" onclick="toggleSelect(this)">
+            <div class="letter">B</div>
+            <div class="content">
+              <h3>Manual Fingerprint</h3>
+              <p>Paranoid: users compare a 64-char key on WhatsApp to confirm identity.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -6,9 +6,12 @@ import androidx.room.RoomDatabase
 import android.content.Context
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 
-@Database(entities = [RawAlert::class], version = 1)
+@Database(entities = [RawAlert::class, ProcessedTransaction::class, ParserRule::class], version = 3)
+@TypeConverters(Converters::class)
 abstract class NativeDatabase : RoomDatabase() {
     abstract fun rawAlertDao(): RawAlertDao
+    abstract fun processedTransactionDao(): ProcessedTransactionDao
+    abstract fun parserRuleDao(): ParserRuleDao
 
     companion object {
         private var INSTANCE: NativeDatabase? = null

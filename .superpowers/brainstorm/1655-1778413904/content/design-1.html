@@ -1,0 +1,28 @@
+<!-- filename: design-1.html -->
+<h2>Section 1: Foreground Promotion & Notification</h2>
+<p class="subtitle">Implementing subtle persistence</p>
+
+<div class="mockup">
+  <div class="mockup-header">Kotlin Service Logic</div>
+  <div class="mockup-body">
+    <div class="section">
+      <div class="label">Promotion Method</div>
+      <p>Inside <code>onStartCommand</code>, we call <code>startForeground(ID, notification)</code> using a low-importance notification channel.</p>
+    </div>
+    <div class="section">
+      <div class="label">The Subtle Icon</div>
+      <p>We'll use a minimalist monochrome icon (shield or dot) that sits in the status bar. The text "Monflo is active" only appears when expanded.</p>
+    </div>
+    <pre>
+// Pseudo-code for promotion
+val channel = NotificationChannel("tracking_channel", "Monflo Tracking", NotificationManager.IMPORTANCE_LOW)
+manager.createNotificationChannel(channel)
+startForeground(NOTIFICATION_ID, buildSubtleNotification())
+    </pre>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Does this subtle persistence look right?</h3>
+  <p>The "Low Importance" setting ensures the notification shade stays clean while the service remains immortal to the OS.</p>
+</div>

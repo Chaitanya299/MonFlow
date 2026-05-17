@@ -209,6 +209,17 @@ fun clearProcessedAlerts(ids: ReadableArray, promise: Promise) {
 
 - [ ] **Step 2: Register Module in ReactPackage**
 
+```kotlin
+class MonfloPackage : ReactPackage {
+    override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
+        return listOf(MonfloModule(reactContext))
+    }
+    override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
+        return emptyList()
+    }
+}
+```
+
 - [ ] **Step 3: Commit**
 
 ```bash
@@ -220,17 +231,34 @@ git commit -m "feat: implement native bridge for batch alert fetching"
 **Files:**
 - Create: `src/domain/tracking/AlertHandshake.ts`
 - Modify: `src/presentation/App.tsx`
+- Modify: `src/domain/tracking/UniversalParser.ts`
 
-- [ ] **Step 1: Build the TS Wrapper for the Handshake**
+- [ ] **Step 1: Add Promotional Filtering to UniversalParser**
+
+```typescript
+const PROMO_KEYWORDS = ["offer", "reward", "cashback", "win", "discount"];
+
+export const UniversalParser = {
+  // ... existing parse logic
+  isPromotional: (text: string): boolean => {
+    const lowerText = text.toLowerCase();
+    return PROMO_KEYWORDS.some(keyword => lowerText.includes(keyword));
+  }
+};
+```
+
+- [ ] **Step 2: Build the TS Wrapper for the Handshake**
 
 ```typescript
 export const runHandshake = async () => {
     const alerts = await MonfloBridge.getPendingAlerts();
     const processedIds = [];
     for (const alert of alerts) {
-        const tx = UniversalParser.parse(alert.rawText);
-        if (tx) {
-            await AccountingRepository.save(tx);
+        if (!UniversalParser.isPromotional(alert.rawText)) {
+            const tx = UniversalParser.parse(alert.rawText);
+            if (tx) {
+                await AccountingRepository.save(tx);
+            }
         }
         processedIds.push(alert.id);
     }
@@ -238,10 +266,10 @@ export const runHandshake = async () => {
 };
 ```
 
-- [ ] **Step 2: Trigger Handshake on App Launch**
+- [ ] **Step 3: Trigger Handshake on App Launch**
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
-git commit -m "feat: integrate native bridge with universal parser"
+git commit -m "feat: integrate native bridge with universal parser and promo filtering"
 ```

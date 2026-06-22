@@ -1,0 +1,28 @@
+[
+  {
+    "category": "boi",
+    "input": "Your BOI Account ending XX9012 is credited with Rs 4,500 on 14-May-26",
+    "expected": {
+      "amount": -450000,
+      "currency": "INR"
+    },
+    "id": "boi_credit_1",
+    "sourcePackage": "sms:VM-BOIAck-T"
+  },
+  {
+    "category": "boi",
+    "input": "BOI -  Rs.10000.00 Credited to your Ac XX1091 on 08-05-26 by UPI ref No.101908450293.Avl Bal 13451.00",
+    "expected": {
+      "amount": -1000000,
+      "currency": "INR"
+    }
+  },
+  {
+    "category": "boi",
+    "input": "BOI -  Rs.13000.00 Credited to your Ac XX1098 on 16-05-26 by UPI ref No.864252686863.Avl Bal 13002.00",
+    "expected": {
+      "amount": -1300000,
+      "currency": "INR"
+    }
+  }
+]

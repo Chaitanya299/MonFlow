@@ -1,0 +1,12 @@
+[
+  {
+    "category": "paytm",
+    "input": "Reversal of ₹200 credited to Paytm Wallet",
+    "expected": {
+      "amount": -20000,
+      "currency": "INR"
+    },
+    "id": "paytm_reversal_1",
+    "sourcePackage": "net.one97.paytm"
+  }
+]

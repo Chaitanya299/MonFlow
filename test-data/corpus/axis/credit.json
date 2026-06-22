@@ -1,0 +1,12 @@
+[
+  {
+    "category": "axis",
+    "input": "Axis Bank A/c *7890 credited with Rs 1,500.00 on 13-May-26 from VPA user@upi",
+    "expected": {
+      "amount": -150000,
+      "currency": "INR"
+    },
+    "id": "axis_credit_1",
+    "sourcePackage": "sms:VM-AXISBK-T"
+  }
+]

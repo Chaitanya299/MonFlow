@@ -1,0 +1,122 @@
+[
+  {
+    "category": "paytm",
+    "input": "Paid ₹498.00 successfully from Paytm Wallet",
+    "expected": {
+      "amount": 49800,
+      "currency": "INR"
+    },
+    "id": "extra_paytm_16",
+    "sourcePackage": "net.one97.paytm"
+  },
+  {
+    "category": "paytm",
+    "input": "₹365.00 debited from Paytm Wallet",
+    "expected": {
+      "amount": 36500,
+      "currency": "INR"
+    },
+    "id": "extra_paytm_17",
+    "sourcePackage": "net.one97.paytm"
+  },
+  {
+    "category": "paytm",
+    "input": "Paid ₹184.00 successfully from Paytm Wallet",
+    "expected": {
+      "amount": 18400,
+      "currency": "INR"
+    },
+    "id": "extra_paytm_28",
+    "sourcePackage": "net.one97.paytm"
+  },
+  {
+    "category": "paytm",
+    "input": "₹475.00 debited from Paytm Wallet",
+    "expected": {
+      "amount": 47500,
+      "currency": "INR"
+    },
+    "id": "extra_paytm_29",
+    "sourcePackage": "net.one97.paytm"
+  },
+  {
+    "category": "paytm",
+    "input": "Paid ₹180.00 successfully from Paytm Wallet",
+    "expected": {
+      "amount": 18000,
+      "currency": "INR"
+    },
+    "id": "extra_paytm_4",
+    "sourcePackage": "net.one97.paytm"
+  },
+  {
+    "category": "paytm",
+    "input": "Paid ₹193.00 successfully from Paytm Wallet",
+    "expected": {
+      "amount": 19300,
+      "currency": "INR"
+    },
+    "id": "extra_paytm_40",
+    "sourcePackage": "net.one97.paytm"
+  },
+  {
+    "category": "paytm",
+    "input": "₹48.00 debited from Paytm Wallet",
+    "expected": {
+      "amount": 4800,
+      "currency": "INR"
+    },
+    "id": "extra_paytm_41",
+    "sourcePackage": "net.one97.paytm"
+  },
+  {
+    "category": "paytm",
+    "input": "₹151.00 debited from Paytm Wallet",
+    "expected": {
+      "amount": 15100,
+      "currency": "INR"
+    },
+    "id": "extra_paytm_5",
+    "sourcePackage": "net.one97.paytm"
+  },
+  {
+    "category": "paytm",
+    "input": "Paid ₹245.00 successfully from Paytm Wallet",
+    "expected": {
+      "amount": 24500,
+      "currency": "INR"
+    },
+    "id": "extra_paytm_52",
+    "sourcePackage": "net.one97.paytm"
+  },
+  {
+    "category": "paytm",
+    "input": "₹336.00 debited from Paytm Wallet",
+    "expected": {
+      "amount": 33600,
+      "currency": "INR"
+    },
+    "id": "extra_paytm_53",
+    "sourcePackage": "net.one97.paytm"
+  },
+  {
+    "category": "paytm",
+    "input": "Paid ₹80 successfully to Auto Driver from Paytm Wallet",
+    "expected": {
+      "amount": 8000,
+      "currency": "INR"
+    },
+    "id": "paytm_debit_1",
+    "sourcePackage": "net.one97.paytm"
+  },
+  {
+    "category": "paytm",
+    "input": "₹250 debited from Paytm Wallet",
+    "expected": {
+      "amount": 25000,
+      "currency": "INR"
+    },
+    "id": "paytm_debit_2",
+    "sourcePackage": "net.one97.paytm"
+  }
+]

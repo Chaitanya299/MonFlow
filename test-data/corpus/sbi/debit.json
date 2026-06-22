@@ -1,0 +1,88 @@
+[
+  {
+    "category": "sbi",
+    "input": "Your A/c XXXXXX1234 has been debited by Rs 2,500.00 on 2026-05-16. (Ref: 1234567890)",
+    "expected": {
+      "amount": 250000,
+      "currency": "INR"
+    }
+  },
+  {
+    "category": "sbi",
+    "input": "Dear UPI user A/C X9988 debited by 168.00 on date 15May26",
+    "expected": {
+      "amount": 16800,
+      "currency": "INR"
+    },
+    "id": "extra_sbi_20",
+    "sourcePackage": "sms:VM-SBIUPI-T"
+  },
+  {
+    "category": "sbi",
+    "input": "Dear UPI user A/C X9988 debited by 181.00 on date 15May26",
+    "expected": {
+      "amount": 18100,
+      "currency": "INR"
+    },
+    "id": "extra_sbi_32",
+    "sourcePackage": "sms:VM-SBIUPI-T"
+  },
+  {
+    "category": "sbi",
+    "input": "Dear UPI user A/C X9988 debited by 178.00 on date 15May26",
+    "expected": {
+      "amount": 17800,
+      "currency": "INR"
+    },
+    "id": "extra_sbi_44",
+    "sourcePackage": "sms:VM-SBIUPI-T"
+  },
+  {
+    "category": "sbi",
+    "input": "Dear UPI user A/C X9988 debited by 188.00 on date 15May26",
+    "expected": {
+      "amount": 18800,
+      "currency": "INR"
+    },
+    "id": "extra_sbi_8",
+    "sourcePackage": "sms:VM-SBIUPI-T"
+  },
+  {
+    "category": "sbi",
+    "input": "Dear UPI user A/C X6090 debited by 15.00 on date 03Apr26 trf to AVENUE FOOD PLAZ Refno 830400847000 If not u? call-1800111109 for other services-18001234-SBI",
+    "expected": {
+      "amount": 1500,
+      "currency": "INR"
+    }
+  },
+  {
+    "category": "sbi",
+    "input": "Spent Rs.3,200 on SBI Credit Card ending 9999 at Amazon on 12-May-26",
+    "expected": {
+      "amount": 320000,
+      "currency": "INR"
+    },
+    "id": "sbi_sms_card_1",
+    "sourcePackage": "sms:VM-SBICRD-T"
+  },
+  {
+    "category": "sbi",
+    "input": "Dear UPI user A/C X1234 debited by 75.00 on date 15May26 trf to AVENUE Refno 999123",
+    "expected": {
+      "amount": 7500,
+      "currency": "INR"
+    },
+    "id": "sbi_sms_debit_1",
+    "sourcePackage": "sms:VM-SBIUPI-T"
+  },
+  {
+    "category": "sbi",
+    "input": "Your A/C X5678 debited by Rs.250 on 14-May-26 for transfer Ref 83040",
+    "expected": {
+      "amount": 25000,
+      "currency": "INR"
+    },
+    "id": "sbi_sms_debit_2",
+    "sourcePackage": "sms:VM-SBIBNK-T"
+  }
+]

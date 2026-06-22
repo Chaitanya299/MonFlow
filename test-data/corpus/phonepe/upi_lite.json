@@ -1,0 +1,22 @@
+[
+  {
+    "category": "phonepe",
+    "input": "UPI LITE: Paid ₹30 to local vendor",
+    "expected": {
+      "amount": 3000,
+      "currency": "INR"
+    },
+    "id": "phonepe_lite_1",
+    "sourcePackage": "com.phonepe.app"
+  },
+  {
+    "category": "phonepe",
+    "input": "UPI LITE: Sent ₹15 for tea",
+    "expected": {
+      "amount": 1500,
+      "currency": "INR"
+    },
+    "id": "phonepe_lite_2",
+    "sourcePackage": "com.phonepe.app"
+  }
+]

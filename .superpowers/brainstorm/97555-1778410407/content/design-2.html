@@ -1,0 +1,42 @@
+<!-- filename: design-2.html -->
+<h2>Section 2: Native Vault Components</h2>
+<p class="subtitle">Ensuring "Industry Level" modularity</p>
+
+<div class="mockup">
+  <div class="mockup-header">Component Map</div>
+  <div class="mockup-body">
+    <div class="section">
+      <h3>1. VaultManager (Kotlin)</h3>
+      <p>Coordinates the flow: <code>Keystore</code> -> <code>Master Entropy</code> -> <code>PBKDF2</code> -> <code>SQLCipher</code>.</p>
+    </div>
+    <div class="section">
+      <h3>2. KeystoreHelper</h3>
+      <p>Wraps <code>AndroidKeyStore</code> to provide hardware-backed encryption for the entropy.</p>
+    </div>
+    <div class="section">
+      <h3>3. MnemonicHelper</h3>
+      <p>BIP-39 implementation for the 12-word recovery phrase.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Final Design Approval</h3>
+  <p>Does this component breakdown and the Recovery Flow meet your requirements for an "Industry Level" app?</p>
+  <div class="options">
+    <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>Approve Design</h3>
+        <p>I'm ready for the Design Doc.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="revise" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>Request Revision</h3>
+        <p>I want to change something (please describe in terminal).</p>
+      </div>
+    </div>
+  </div>
+</div>

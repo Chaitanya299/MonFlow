@@ -1,0 +1,25 @@
+<!-- filename: design-1.html -->
+<h2>Section 1: Key Lifecycle & Derivation</h2>
+<p class="subtitle">From 12 Words to AES-256 Encryption</p>
+
+<div class="mockup">
+  <div class="mockup-header">The "Master Seed" Flow</div>
+  <div class="mockup-body">
+    <pre>
+1. [BIP-39 Generator] ---> Generates 12 random words (e.g. "apple banana...")
+2. [Entropy Source]   ---> 128-bit master entropy derived from words
+3. [PBKDF2 Function]  ---> Master Entropy + Hardware Salt (Android ID)
+                            + 10,000 iterations
+4. [SQLCipher Key]    ---> 256-bit AES passphrase (used to open Room)
+    </pre>
+    <div class="section">
+      <div class="label">Storage Logic</div>
+      <p>The **128-bit Master Entropy** is stored in the **Android Keystore**, encrypted with a hardware-backed AES key. This allows the background tracking service to "fetch" the entropy and re-derive the SQLCipher key silently.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Does this derivation flow look right?</h3>
+  <p>We are using BIP-39 (the industry standard for crypto wallets) to ensure your 12 words are universally compatible if we ever build a desktop or web version.</p>
+</div>

@@ -1,0 +1,80 @@
+[
+  {
+    "category": "gpay",
+    "input": "₹200 received from User",
+    "expected": {
+      "amount": -20000,
+      "currency": "INR"
+    }
+  },
+  {
+    "category": "gpay",
+    "input": "You received ₹241.00 from friend",
+    "expected": {
+      "amount": -24100,
+      "currency": "INR"
+    },
+    "id": "extra_gpay_1",
+    "sourcePackage": "com.google.android.apps.nbu.paisa.user"
+  },
+  {
+    "category": "gpay",
+    "input": "You received ₹201.00 from friend",
+    "expected": {
+      "amount": -20100,
+      "currency": "INR"
+    },
+    "id": "extra_gpay_13",
+    "sourcePackage": "com.google.android.apps.nbu.paisa.user"
+  },
+  {
+    "category": "gpay",
+    "input": "You received ₹157.00 from friend",
+    "expected": {
+      "amount": -15700,
+      "currency": "INR"
+    },
+    "id": "extra_gpay_25",
+    "sourcePackage": "com.google.android.apps.nbu.paisa.user"
+  },
+  {
+    "category": "gpay",
+    "input": "You received ₹63.00 from friend",
+    "expected": {
+      "amount": -6300,
+      "currency": "INR"
+    },
+    "id": "extra_gpay_37",
+    "sourcePackage": "com.google.android.apps.nbu.paisa.user"
+  },
+  {
+    "category": "gpay",
+    "input": "You received ₹407.00 from friend",
+    "expected": {
+      "amount": -40700,
+      "currency": "INR"
+    },
+    "id": "extra_gpay_49",
+    "sourcePackage": "com.google.android.apps.nbu.paisa.user"
+  },
+  {
+    "category": "gpay",
+    "input": "You received ₹500.00 from Mom",
+    "expected": {
+      "amount": -50000,
+      "currency": "INR"
+    },
+    "id": "gpay_credit_1",
+    "sourcePackage": "com.google.android.apps.nbu.paisa.user"
+  },
+  {
+    "category": "gpay",
+    "input": "You received ₹1,500 from Rahul via Google Pay",
+    "expected": {
+      "amount": -150000,
+      "currency": "INR"
+    },
+    "id": "gpay_credit_2",
+    "sourcePackage": "com.google.android.apps.nbu.paisa.user"
+  }
+]

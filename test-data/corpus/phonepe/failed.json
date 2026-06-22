@@ -1,0 +1,12 @@
+[
+  {
+    "category": "phonepe",
+    "input": "Payment of ₹500 to Swiggy failed on PhonePe",
+    "expected": {
+      "amount": 50000,
+      "currency": "INR"
+    },
+    "id": "phonepe_failed",
+    "sourcePackage": "com.phonepe.app"
+  }
+]

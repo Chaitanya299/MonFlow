@@ -1,0 +1,126 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+vi.mock('react-native', () => ({
+  NativeModules: {
+    MonfloBridge: {
+      getPendingAlerts: vi.fn(),
+      clearProcessedAlerts: vi.fn(),
+      saveTransaction: vi.fn(),
+    },
+  },
+}));
+
+import { NativeModules } from 'react-native';
+import { runHandshake } from '../../../src/domain/tracking/AlertHandshake';
+
+const mockBridge = NativeModules.MonfloBridge as {
+  getPendingAlerts: ReturnType<typeof vi.fn>;
+  clearProcessedAlerts: ReturnType<typeof vi.fn>;
+  saveTransaction: ReturnType<typeof vi.fn>;
+};
+
+describe('AlertHandshake — runHandshake', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  it('should fetch alerts from native bridge', async () => {
+    mockBridge.getPendingAlerts.mockResolvedValue([]);
+    await runHandshake();
+    expect(mockBridge.getPendingAlerts).toHaveBeenCalledOnce();
+  });
+
+  it('should parse valid transaction and log it', async () => {
+    mockBridge.getPendingAlerts.mockResolvedValue([
+      { id: 1, rawText: 'Paid ₹500 to Rahul', packageName: 'com.google.pay', timestamp: Date.now() },
+    ]);
+    mockBridge.clearProcessedAlerts.mockResolvedValue(undefined);
+
+    await runHandshake();
+
+    expect(console.log).toHaveBeenCalledWith('Parsed transaction: 50000 INR');
+  });
+
+  it('should clear all processed alert IDs after parsing', async () => {
+    mockBridge.getPendingAlerts.mockResolvedValue([
+      { id: 1, rawText: 'Paid ₹500 to Rahul', packageName: 'com.google.pay', timestamp: Date.now() },
+      { id: 2, rawText: '₹200 received from Priya', packageName: 'com.phonepe', timestamp: Date.now() },
+    ]);
+    mockBridge.clearProcessedAlerts.mockResolvedValue(undefined);
+
+    await runHandshake();
+
+    expect(mockBridge.clearProcessedAlerts).toHaveBeenCalledWith([1, 2]);
+  });
+
+  it('should filter out promotional alerts (not parse them)', async () => {
+    mockBridge.getPendingAlerts.mockResolvedValue([
+      { id: 1, rawText: 'Special offer: Get 50% discount on orders using code PROMO1!', packageName: 'com.paytm', timestamp: Date.now() },
+    ]);
+    mockBridge.clearProcessedAlerts.mockResolvedValue(undefined);
+
+    await runHandshake();
+
+    expect(console.log).not.toHaveBeenCalled();
+    expect(mockBridge.clearProcessedAlerts).toHaveBeenCalledWith([1]);
+  });
+
+  it('should still clear IDs for promotional alerts', async () => {
+    mockBridge.getPendingAlerts.mockResolvedValue([
+      { id: 10, rawText: 'Get 20% discount! Use code SAVE20', packageName: 'com.paytm', timestamp: Date.now() },
+    ]);
+    mockBridge.clearProcessedAlerts.mockResolvedValue(undefined);
+
+    await runHandshake();
+
+    expect(mockBridge.clearProcessedAlerts).toHaveBeenCalledWith([10]);
+  });
+
+  it('should skip clearProcessedAlerts when alerts list is empty', async () => {
+    mockBridge.getPendingAlerts.mockResolvedValue([]);
+    await runHandshake();
+    expect(mockBridge.clearProcessedAlerts).not.toHaveBeenCalled();
+  });
+
+  it('should skip clearProcessedAlerts when alerts is null', async () => {
+    mockBridge.getPendingAlerts.mockResolvedValue(null);
+    await runHandshake();
+    expect(mockBridge.clearProcessedAlerts).not.toHaveBeenCalled();
+  });
+
+  it('should catch and log errors from native bridge', async () => {
+    mockBridge.getPendingAlerts.mockRejectedValue(new Error('Bridge disconnected'));
+    await runHandshake();
+    expect(console.error).toHaveBeenCalledWith('Handshake failed:', expect.any(Error));
+  });
+
+  it('should handle mixed valid + promotional + unparseable alerts', async () => {
+    mockBridge.getPendingAlerts.mockResolvedValue([
+      { id: 1, rawText: 'Paid ₹100 to Amit', packageName: 'com.google.pay', timestamp: Date.now() },
+      { id: 2, rawText: 'Win ₹5000 now!', packageName: 'com.spam', timestamp: Date.now() },
+      { id: 3, rawText: 'Random text no amount', packageName: 'com.unknown', timestamp: Date.now() },
+    ]);
+    mockBridge.clearProcessedAlerts.mockResolvedValue(undefined);
+
+    await runHandshake();
+
+    expect(console.log).toHaveBeenCalledTimes(1);
+    expect(console.log).toHaveBeenCalledWith('Parsed transaction: 10000 INR');
+    expect(mockBridge.clearProcessedAlerts).toHaveBeenCalledWith([1, 2, 3]);
+  });
+});
+
+describe('AlertHandshake — bridge unavailable', () => {
+  it('should warn and return early when MonfloBridge is null', async () => {
+    const origBridge = NativeModules.MonfloBridge;
+    (NativeModules as any).MonfloBridge = null;
+
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { runHandshake: freshHandshake } = await import('../../../src/domain/tracking/AlertHandshake');
+
+    (NativeModules as any).MonfloBridge = origBridge;
+  });
+});

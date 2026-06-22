@@ -1,0 +1,100 @@
+[
+  {
+    "category": "gpay",
+    "input": "Paid ₹1,500.50 to Zomato",
+    "expected": {
+      "amount": 150050,
+      "currency": "INR"
+    }
+  },
+  {
+    "category": "gpay",
+    "input": "You paid ₹55.00 to local store",
+    "expected": {
+      "amount": 5500,
+      "currency": "INR"
+    },
+    "id": "extra_gpay_0",
+    "sourcePackage": "com.google.android.apps.nbu.paisa.user"
+  },
+  {
+    "category": "gpay",
+    "input": "You paid ₹116.00 to local store",
+    "expected": {
+      "amount": 11600,
+      "currency": "INR"
+    },
+    "id": "extra_gpay_12",
+    "sourcePackage": "com.google.android.apps.nbu.paisa.user"
+  },
+  {
+    "category": "gpay",
+    "input": "You paid ₹137.00 to local store",
+    "expected": {
+      "amount": 13700,
+      "currency": "INR"
+    },
+    "id": "extra_gpay_24",
+    "sourcePackage": "com.google.android.apps.nbu.paisa.user"
+  },
+  {
+    "category": "gpay",
+    "input": "You paid ₹201.00 to local store",
+    "expected": {
+      "amount": 20100,
+      "currency": "INR"
+    },
+    "id": "extra_gpay_36",
+    "sourcePackage": "com.google.android.apps.nbu.paisa.user"
+  },
+  {
+    "category": "gpay",
+    "input": "You paid ₹239.00 to local store",
+    "expected": {
+      "amount": 23900,
+      "currency": "INR"
+    },
+    "id": "extra_gpay_48",
+    "sourcePackage": "com.google.android.apps.nbu.paisa.user"
+  },
+  {
+    "category": "gpay",
+    "input": "You paid ₹150.00 to Chai Tapri via Google Pay",
+    "expected": {
+      "amount": 15000,
+      "currency": "INR"
+    },
+    "id": "gpay_debit_1",
+    "sourcePackage": "com.google.android.apps.nbu.paisa.user"
+  },
+  {
+    "category": "gpay",
+    "input": "You paid ₹1,200 to Zomato successfully",
+    "expected": {
+      "amount": 120000,
+      "currency": "INR"
+    },
+    "id": "gpay_debit_2",
+    "sourcePackage": "com.google.android.apps.nbu.paisa.user"
+  },
+  {
+    "category": "gpay",
+    "input": "You paid ₹45.50 to Ramesh",
+    "expected": {
+      "amount": 4550,
+      "currency": "INR"
+    },
+    "id": "gpay_debit_3",
+    "sourcePackage": "com.google.android.apps.nbu.paisa.user"
+  },
+  {
+    "category": "gpay",
+    "input": "Payment of ₹500 to Merchant is processing",
+    "expected": {
+      "amount": 50000,
+      "currency": "INR"
+    },
+    "id": "gpay_initiated",
+    "sourcePackage": "com.google.android.apps.nbu.paisa.user"
+  }
+]

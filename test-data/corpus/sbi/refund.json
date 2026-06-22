@@ -1,0 +1,12 @@
+[
+  {
+    "category": "sbi",
+    "input": "Rs.450.00 refunded back in SBI A/c *1234",
+    "expected": {
+      "amount": -45000,
+      "currency": "INR"
+    },
+    "id": "sbi_sms_refund_1",
+    "sourcePackage": "sms:VM-SBIBNK-T"
+  }
+]

@@ -1,0 +1,32 @@
+node_modules
+ruvector.db
+*.db
+.DS_Store
+**/.DS_Store
+.gradle/
+build/
+local.properties
+
+# Added by code-review-graph
+.code-review-graph/
+
+# IDEs and AI tools config
+.claude-flow/
+.claude/
+.claudeignore
+.cursor/
+.cursorrules
+.gemini/
+.kiro/
+.mcp.json
+.opencode.json
+.qoder/
+.rtk/
+.swarm/
+.vscode/
+.windsurfrules
+AGENTS.md
+GEMINI.md
+QODER.md
+agents/
+.github/code-review-graph.instruction.md

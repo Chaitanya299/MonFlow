@@ -1,0 +1,12 @@
+[
+  {
+    "category": "paytm",
+    "input": "UPI Lite: Paid ₹25 successfully to Tea Shop from Paytm UPI Lite",
+    "expected": {
+      "amount": 2500,
+      "currency": "INR"
+    },
+    "id": "paytm_lite_1",
+    "sourcePackage": "net.one97.paytm"
+  }
+]

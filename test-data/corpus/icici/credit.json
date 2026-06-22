@@ -1,0 +1,94 @@
+[
+  {
+    "category": "icici",
+    "input": "Dear Customer, Acct XX998 is credited with Rs 125.00 on 13-May-26",
+    "expected": {
+      "amount": -12500,
+      "currency": "INR"
+    },
+    "id": "extra_icici_11",
+    "sourcePackage": "sms:VM-ICICIB-T"
+  },
+  {
+    "category": "icici",
+    "input": "Dear Customer, Acct XX998 is credited with Rs 431.00 on 13-May-26",
+    "expected": {
+      "amount": -43100,
+      "currency": "INR"
+    },
+    "id": "extra_icici_23",
+    "sourcePackage": "sms:VM-ICICIB-T"
+  },
+  {
+    "category": "icici",
+    "input": "Dear Customer, Acct XX998 is credited with Rs 29.00 on 13-May-26",
+    "expected": {
+      "amount": -2900,
+      "currency": "INR"
+    },
+    "id": "extra_icici_35",
+    "sourcePackage": "sms:VM-ICICIB-T"
+  },
+  {
+    "category": "icici",
+    "input": "Dear Customer, Acct XX998 is credited with Rs 16.00 on 13-May-26",
+    "expected": {
+      "amount": -1600,
+      "currency": "INR"
+    },
+    "id": "extra_icici_47",
+    "sourcePackage": "sms:VM-ICICIB-T"
+  },
+  {
+    "category": "icici",
+    "input": "Dear Customer, Acct XX041 is credited with Rs 1760.00 on 13-May-26 from TULALA. UPI:123",
+    "expected": {
+      "amount": -176000,
+      "currency": "INR"
+    },
+    "id": "icici_sms_credit_1",
+    "sourcePackage": "sms:VM-ICICIB-T"
+  },
+  {
+    "category": "icici",
+    "input": "ICICI Bank Acct XX041 debited for Rs 75.00 on 15-May-26; SHAIK credited. UPI:737761",
+    "expected": {
+      "amount": 7500,
+      "currency": "INR"
+    },
+    "id": "icici_sms_debit_1",
+    "sourcePackage": "sms:VM-ICICIB-T"
+  },
+  {
+    "category": "icici",
+    "input": "Dear Customer, Acct XX041 is credited with Rs 1760.00 on 13-May-26 from TULALA HARSHA G. UPI:123337608996-ICICI Bank.",
+    "expected": {
+      "amount": -176000,
+      "currency": "INR"
+    }
+  },
+  {
+    "category": "icici",
+    "input": "Dear Customer, Acct XX329 is credited with Rs 10000.00 on 15-May-26 from SURYA FUEL STAT. UPI:006605302349-ICICI Bank.",
+    "expected": {
+      "amount": -1000000,
+      "currency": "INR"
+    }
+  },
+  {
+    "category": "icici",
+    "input": "ICICI Bank Acct XX041 debited for Rs 75.00 on 15-May-26; SHAIK IMRAN AHM credited. UPI:737761560069. Call 18002662 for dispute. SMS BLOCK 041 to 9215676766",
+    "expected": {
+      "amount": 7500,
+      "currency": "INR"
+    }
+  },
+  {
+    "category": "icici",
+    "input": "ICICI Bank Acct XX329 debited for Rs 4999.00 on 16-May-26; SURYA FUEL STAT credited. UPI:976422063511. Call 18002662 for dispute. SMS BLOCK 329 to 9215676766",
+    "expected": {
+      "amount": 499900,
+      "currency": "INR"
+    }
+  }
+]

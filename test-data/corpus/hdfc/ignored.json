@@ -1,0 +1,37 @@
+[
+  {
+    "category": "hdfc",
+    "input": "Dear Customer, a cooling period limit of Rs. 5000 every 24 hours is applicable. Ref ID 0",
+    "expected": null,
+    "id": "ignored_alert_0",
+    "sourcePackage": "sms:VM-HDFCBK-T"
+  },
+  {
+    "category": "hdfc",
+    "input": "Dear Customer, a cooling period limit of Rs. 5000 every 24 hours is applicable. Ref ID 1",
+    "expected": null,
+    "id": "ignored_alert_1",
+    "sourcePackage": "sms:VM-HDFCBK-T"
+  },
+  {
+    "category": "hdfc",
+    "input": "Dear Customer, a cooling period limit of Rs. 5000 every 24 hours is applicable. Ref ID 2",
+    "expected": null,
+    "id": "ignored_alert_2",
+    "sourcePackage": "sms:VM-HDFCBK-T"
+  },
+  {
+    "category": "hdfc",
+    "input": "Dear Customer, a cooling period limit of Rs. 5000 every 24 hours is applicable. Ref ID 3",
+    "expected": null,
+    "id": "ignored_alert_3",
+    "sourcePackage": "sms:VM-HDFCBK-T"
+  },
+  {
+    "category": "hdfc",
+    "input": "Dear Customer, a cooling period limit of Rs. 5000 every 24 hours is applicable. Ref ID 4",
+    "expected": null,
+    "id": "ignored_alert_4",
+    "sourcePackage": "sms:VM-HDFCBK-T"
+  }
+]

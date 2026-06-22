@@ -1,0 +1,52 @@
+[
+  {
+    "category": "sbi",
+    "input": "Dear Customer, A/c X9988 is credited with Rs.487.00 on 14-May-26",
+    "expected": {
+      "amount": -48700,
+      "currency": "INR"
+    },
+    "id": "extra_sbi_21",
+    "sourcePackage": "sms:VM-SBIBNK-T"
+  },
+  {
+    "category": "sbi",
+    "input": "Dear Customer, A/c X9988 is credited with Rs.202.00 on 14-May-26",
+    "expected": {
+      "amount": -20200,
+      "currency": "INR"
+    },
+    "id": "extra_sbi_33",
+    "sourcePackage": "sms:VM-SBIBNK-T"
+  },
+  {
+    "category": "sbi",
+    "input": "Dear Customer, A/c X9988 is credited with Rs.255.00 on 14-May-26",
+    "expected": {
+      "amount": -25500,
+      "currency": "INR"
+    },
+    "id": "extra_sbi_45",
+    "sourcePackage": "sms:VM-SBIBNK-T"
+  },
+  {
+    "category": "sbi",
+    "input": "Dear Customer, A/c X9988 is credited with Rs.87.00 on 14-May-26",
+    "expected": {
+      "amount": -8700,
+      "currency": "INR"
+    },
+    "id": "extra_sbi_9",
+    "sourcePackage": "sms:VM-SBIBNK-T"
+  },
+  {
+    "category": "sbi",
+    "input": "Dear Customer, A/c X1234 is credited with Rs.1500 on 13-May-26 by transfer from User",
+    "expected": {
+      "amount": -150000,
+      "currency": "INR"
+    },
+    "id": "sbi_sms_credit_1",
+    "sourcePackage": "sms:VM-SBIBNK-T"
+  }
+]

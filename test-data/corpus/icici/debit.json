@@ -1,0 +1,60 @@
+[
+  {
+    "category": "icici",
+    "input": "i-Safe: Trans of INR 450.75 on ICICI Bank Card XX1001. Merchant: AMAZON PAY.",
+    "expected": {
+      "amount": 45075,
+      "currency": "INR"
+    }
+  },
+  {
+    "category": "icici",
+    "input": "ICICI Bank Acct XX998 debited for Rs 503.00 on 15-May-26",
+    "expected": {
+      "amount": 50300,
+      "currency": "INR"
+    },
+    "id": "extra_icici_10",
+    "sourcePackage": "sms:VM-ICICIB-T"
+  },
+  {
+    "category": "icici",
+    "input": "ICICI Bank Acct XX998 debited for Rs 91.00 on 15-May-26",
+    "expected": {
+      "amount": 9100,
+      "currency": "INR"
+    },
+    "id": "extra_icici_22",
+    "sourcePackage": "sms:VM-ICICIB-T"
+  },
+  {
+    "category": "icici",
+    "input": "ICICI Bank Acct XX998 debited for Rs 233.00 on 15-May-26",
+    "expected": {
+      "amount": 23300,
+      "currency": "INR"
+    },
+    "id": "extra_icici_34",
+    "sourcePackage": "sms:VM-ICICIB-T"
+  },
+  {
+    "category": "icici",
+    "input": "ICICI Bank Acct XX998 debited for Rs 143.00 on 15-May-26",
+    "expected": {
+      "amount": 14300,
+      "currency": "INR"
+    },
+    "id": "extra_icici_46",
+    "sourcePackage": "sms:VM-ICICIB-T"
+  },
+  {
+    "category": "icici",
+    "input": "Spent Rs 4,500.00 on ICICI Bank Credit Card XX9001 at Flipkart on 14-May-26",
+    "expected": {
+      "amount": 450000,
+      "currency": "INR"
+    },
+    "id": "icici_sms_card_1",
+    "sourcePackage": "sms:VM-ICICIC-T"
+  }
+]

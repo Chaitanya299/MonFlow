@@ -1,0 +1,90 @@
+[
+  {
+    "category": "phonepe",
+    "input": "Payment of ₹500 to Swiggy successful",
+    "expected": {
+      "amount": 50000,
+      "currency": "INR"
+    }
+  },
+  {
+    "category": "phonepe",
+    "input": "Paid ₹505.00 successfully to local vendor",
+    "expected": {
+      "amount": 50500,
+      "currency": "INR"
+    },
+    "id": "extra_phonepe_14",
+    "sourcePackage": "com.phonepe.app"
+  },
+  {
+    "category": "phonepe",
+    "input": "Paid ₹257.00 successfully to local vendor",
+    "expected": {
+      "amount": 25700,
+      "currency": "INR"
+    },
+    "id": "extra_phonepe_2",
+    "sourcePackage": "com.phonepe.app"
+  },
+  {
+    "category": "phonepe",
+    "input": "Paid ₹387.00 successfully to local vendor",
+    "expected": {
+      "amount": 38700,
+      "currency": "INR"
+    },
+    "id": "extra_phonepe_26",
+    "sourcePackage": "com.phonepe.app"
+  },
+  {
+    "category": "phonepe",
+    "input": "Paid ₹26.00 successfully to local vendor",
+    "expected": {
+      "amount": 2600,
+      "currency": "INR"
+    },
+    "id": "extra_phonepe_38",
+    "sourcePackage": "com.phonepe.app"
+  },
+  {
+    "category": "phonepe",
+    "input": "Paid ₹39.00 successfully to local vendor",
+    "expected": {
+      "amount": 3900,
+      "currency": "INR"
+    },
+    "id": "extra_phonepe_50",
+    "sourcePackage": "com.phonepe.app"
+  },
+  {
+    "category": "phonepe",
+    "input": "Paid ₹120 to Tea Corner on PhonePe",
+    "expected": {
+      "amount": 12000,
+      "currency": "INR"
+    },
+    "id": "phonepe_debit_1",
+    "sourcePackage": "com.phonepe.app"
+  },
+  {
+    "category": "phonepe",
+    "input": "Sent ₹5,000 to Priya",
+    "expected": {
+      "amount": 500000,
+      "currency": "INR"
+    },
+    "id": "phonepe_debit_2",
+    "sourcePackage": "com.phonepe.app"
+  },
+  {
+    "category": "phonepe",
+    "input": "₹250.00 sent successfully to Rent Store",
+    "expected": {
+      "amount": 25000,
+      "currency": "INR"
+    },
+    "id": "phonepe_debit_3",
+    "sourcePackage": "com.phonepe.app"
+  }
+]

@@ -1,0 +1,12 @@
+[
+  {
+    "category": "hdfc",
+    "input": "Reversal Rs.120.00 credited to HDFC Bank A/C *1234",
+    "expected": {
+      "amount": -12000,
+      "currency": "INR"
+    },
+    "id": "hdfc_sms_reversal_1",
+    "sourcePackage": "sms:VM-HDFCBK-T"
+  }
+]

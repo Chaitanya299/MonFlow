@@ -1,0 +1,40 @@
+<!-- filename: approaches.html -->
+<h2>Foreground Persistence Approaches</h2>
+<p class="subtitle">Ensuring the Monflo Listener stays alive</p>
+
+<div class="cards">
+  <div class="card" data-choice="lifecycle-bridge" onclick="toggleSelect(this)">
+    <div class="card-body">
+      <h3>Approach 1: Shared Lifecycle Bridge (Recommended)</h3>
+      <p>The <b>NotificationListenerService</b> itself handles the foreground promotion. When React Native toggles the switch, it calls a bridge method that starts/stops the service with a <code>START_STICKY</code> flag.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <ul>
+            <li>Cleaner architecture: tracking logic and persistence live in one class</li>
+            <li>Simpler auto-start on boot logic</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="separate-manager" onclick="toggleSelect(this)">
+    <div class="card-body">
+      <h3>Approach 2: Separate Service Manager</h3>
+      <p>A separate <b>ForegroundService.kt</b> manages the notification and keep-alive state. It "Monitors" the <b>NotificationListenerService</b> and restarts it if it crashes.</p>
+      <div class="pros-cons">
+        <div class="cons">
+          <ul>
+            <li>Over-engineered for a v1 prototype</li>
+            <li>More complex communication between two native services</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>My Recommendation</h3>
+  <p><b>Approach 1: Shared Lifecycle Bridge</b> is the most "Industry Level" path for a focused utility app. It minimizes the surface area for bugs and provides a direct link between the UI toggle and the system service state.</p>
+</div>

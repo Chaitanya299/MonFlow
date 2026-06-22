@@ -1,0 +1,12 @@
+[
+  {
+    "category": "hdfc",
+    "input": "Refund Alert! Rs.350 back in HDFC Bank A/c *1234 on 17-May-26",
+    "expected": {
+      "amount": -35000,
+      "currency": "INR"
+    },
+    "id": "hdfc_sms_refund_1",
+    "sourcePackage": "sms:VM-HDFCBK-T"
+  }
+]

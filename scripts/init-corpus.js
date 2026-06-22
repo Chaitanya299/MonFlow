@@ -51,17 +51,87 @@ const INITIAL_SAMPLES = [
   }
 ];
 
+function getTargetFile(sample) {
+  const input = (sample.input || '').toLowerCase();
+  const expected = sample.expected;
+
+  if (input.includes('promo') || input.includes('special offer')) {
+    return 'promo.json';
+  }
+  if (input.includes('fake-sbi')) {
+    return 'scam.json';
+  }
+  if (input.includes('ignored') || expected === null) {
+    return 'ignored.json';
+  }
+  if (input.includes('refund')) {
+    return 'refund.json';
+  }
+  if (input.includes('reversal')) {
+    return 'reversal.json';
+  }
+  if (input.includes('lite:')) {
+    return 'upi_lite.json';
+  }
+  if (input.includes('cashback')) {
+    return 'cashback.json';
+  }
+  if (input.includes('statement')) {
+    return 'statement.json';
+  }
+  if (input.includes('failed')) {
+    return 'failed.json';
+  }
+  if (input.includes('credited') || input.includes('received')) {
+    return 'credit.json';
+  }
+  if (input.includes('debited') || input.includes('sent') || input.includes('spent') || input.includes('paid')) {
+    return 'debit.json';
+  }
+
+  // Fallbacks
+  if (expected && expected.amount < 0) {
+    return 'credit.json';
+  }
+  if (expected && expected.amount > 0) {
+    return 'debit.json';
+  }
+
+  return 'unknown.json';
+}
+
 function initialize() {
   console.log('🏗️  Initializing Test Corpus...');
 
+  const groups = {};
   INITIAL_SAMPLES.forEach((sample, index) => {
-    const providerDir = path.join(CORPUS_DIR, sample.category);
+    const cat = sample.category;
+    const targetFile = getTargetFile(sample);
+    if (!groups[cat]) {
+      groups[cat] = {};
+    }
+    if (!groups[cat][targetFile]) {
+      groups[cat][targetFile] = [];
+    }
+    const cleanSample = {
+      category: sample.category,
+      input: sample.input,
+      expected: sample.expected,
+      id: `${sample.category}_init_${index + 1}`
+    };
+    groups[cat][targetFile].push(cleanSample);
+  });
+
+  Object.keys(groups).forEach(cat => {
+    const providerDir = path.join(CORPUS_DIR, cat);
     if (!fs.existsSync(providerDir)) {
       fs.mkdirSync(providerDir, { recursive: true });
     }
-    const filePath = path.join(providerDir, `sample-${index + 1}.json`);
-    fs.writeFileSync(filePath, JSON.stringify(sample, null, 2));
-    console.log(`✅ Created ${sample.category} sample: ${path.basename(filePath)}`);
+    Object.keys(groups[cat]).forEach(targetFile => {
+      const filePath = path.join(providerDir, targetFile);
+      fs.writeFileSync(filePath, JSON.stringify(groups[cat][targetFile], null, 2));
+      console.log(`✅ Created ${cat} array: ${targetFile}`);
+    });
   });
 
   console.log('\n🌟 Corpus initialized with 6 core samples across 5 providers.');

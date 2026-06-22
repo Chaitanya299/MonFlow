@@ -1,0 +1,12 @@
+[
+  {
+    "category": "phonepe",
+    "input": "Reversal of ₹150.00 successful on PhonePe",
+    "expected": {
+      "amount": -15000,
+      "currency": "INR"
+    },
+    "id": "phonepe_reversal_1",
+    "sourcePackage": "com.phonepe.app"
+  }
+]

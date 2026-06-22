@@ -1,8 +1,0 @@
-{
-  "category": "hsbc",
-  "input": "NR 1000.00 is paid from HSBC account XXXXXX1006 to BEHERA TATHAGAT on 11-May-26 with ref 613101256215. If this is not done by you, call 18002673456 to report.",
-  "expected": {
-    "amount": 100000,
-    "currency": "INR"
-  }
-}

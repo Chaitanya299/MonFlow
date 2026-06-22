@@ -1,0 +1,37 @@
+[
+  {
+    "category": "sbi",
+    "input": "Special offer: Get 50% discount on orders using code PROMO0!",
+    "expected": null,
+    "id": "promo_sms_0",
+    "sourcePackage": "sms:VM-SBIBNK-P"
+  },
+  {
+    "category": "sbi",
+    "input": "Special offer: Get 50% discount on orders using code PROMO1!",
+    "expected": null,
+    "id": "promo_sms_1",
+    "sourcePackage": "sms:VM-SBIBNK-P"
+  },
+  {
+    "category": "sbi",
+    "input": "Special offer: Get 50% discount on orders using code PROMO2!",
+    "expected": null,
+    "id": "promo_sms_2",
+    "sourcePackage": "sms:VM-SBIBNK-P"
+  },
+  {
+    "category": "sbi",
+    "input": "Special offer: Get 50% discount on orders using code PROMO3!",
+    "expected": null,
+    "id": "promo_sms_3",
+    "sourcePackage": "sms:VM-SBIBNK-P"
+  },
+  {
+    "category": "sbi",
+    "input": "Special offer: Get 50% discount on orders using code PROMO4!",
+    "expected": null,
+    "id": "promo_sms_4",
+    "sourcePackage": "sms:VM-SBIBNK-P"
+  }
+]

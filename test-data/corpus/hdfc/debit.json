@@ -1,0 +1,111 @@
+[
+  {
+    "category": "hdfc",
+    "input": "Rs.1,200.00 debited from A/c XX4512 on 16-MAY-26 to User. Info: UPI-SWIGGY.",
+    "expected": {
+      "amount": 120000,
+      "currency": "INR"
+    }
+  },
+  {
+    "category": "hdfc",
+    "input": "Sent Rs.333.00 From HDFC Bank A/C *9988",
+    "expected": {
+      "amount": 33300,
+      "currency": "INR"
+    },
+    "id": "extra_hdfc_18",
+    "sourcePackage": "sms:VM-HDFCBK-T"
+  },
+  {
+    "category": "hdfc",
+    "input": "Sent Rs.475.00 From HDFC Bank A/C *9988",
+    "expected": {
+      "amount": 47500,
+      "currency": "INR"
+    },
+    "id": "extra_hdfc_30",
+    "sourcePackage": "sms:VM-HDFCBK-T"
+  },
+  {
+    "category": "hdfc",
+    "input": "Sent Rs.226.00 From HDFC Bank A/C *9988",
+    "expected": {
+      "amount": 22600,
+      "currency": "INR"
+    },
+    "id": "extra_hdfc_42",
+    "sourcePackage": "sms:VM-HDFCBK-T"
+  },
+  {
+    "category": "hdfc",
+    "input": "Sent Rs.160.00 From HDFC Bank A/C *9988",
+    "expected": {
+      "amount": 16000,
+      "currency": "INR"
+    },
+    "id": "extra_hdfc_6",
+    "sourcePackage": "sms:VM-HDFCBK-T"
+  },
+  {
+    "category": "hdfc",
+    "input": "Sent Rs.500.00 From HDFC Bank A/C *1234 to Merchant Ref 123456",
+    "expected": {
+      "amount": 50000,
+      "currency": "INR"
+    },
+    "id": "hdfc_sms_debit_1",
+    "sourcePackage": "sms:VM-HDFCBK-T"
+  },
+  {
+    "category": "hdfc",
+    "input": "Spent Rs.1500 on HDFC Bank Card ending 5678 at Swiggy on 15-May-26",
+    "expected": {
+      "amount": 150000,
+      "currency": "INR"
+    },
+    "id": "hdfc_sms_debit_2",
+    "sourcePackage": "sms:VM-HDFCBK-T"
+  },
+  {
+    "category": "hdfc",
+    "input": "HDFC Bank: Rs.5400.50 debited from A/c XX1234 on 2026-05-16. Info: Amazon Pay.",
+    "expected": {
+      "amount": 540050,
+      "currency": "INR"
+    },
+    "sourcePackage": "sms:VM-HDFCBK-T"
+  },
+  {
+    "category": "hdfc",
+    "input": "Sent Rs.200.00\nFrom HDFC Bank A/C *6084\nTo Zepto\nOn 16/05/26\nRef 134956946180\nNot You?\nCall 18002586161/SMS BLOCK UPI to 7308080808",
+    "expected": {
+      "amount": 20000,
+      "currency": "INR"
+    }
+  },
+  {
+    "category": "hdfc",
+    "input": "Sent Rs.342.00\nFrom HDFC Bank A/C *6084\nTo ORGANIC CREAMERY MADHAPUR\nOn 15/05/26\nRef 650122977911\nNot You?\nCall 18002586161/SMS BLOCK UPI to 7308080808",
+    "expected": {
+      "amount": 34200,
+      "currency": "INR"
+    }
+  },
+  {
+    "category": "hdfc",
+    "input": "Sent Rs.194.00\nFrom HDFC Bank A/C *6084\nTo Amazon Pay Groceries\nOn 14/05/26\nRef 613430358001\nNot You?\nCall 18002586161/SMS BLOCK UPI to 7308080808",
+    "expected": {
+      "amount": 19400,
+      "currency": "INR"
+    }
+  },
+  {
+    "category": "hdfc",
+    "input": "Sent Rs.60.00\nFrom HDFC Bank A/C *6084\nTo BANDLAMUDI ANUSHA\nOn 14/05/26\nRef 650012723604\nNot You?\nCall 18002586161/SMS BLOCK UPI to 7308080808",
+    "expected": {
+      "amount": 6000,
+      "currency": "INR"
+    }
+  }
+]

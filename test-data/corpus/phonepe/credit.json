@@ -1,0 +1,62 @@
+[
+  {
+    "category": "phonepe",
+    "input": "Received ₹434.00 from uncle",
+    "expected": {
+      "amount": -43400,
+      "currency": "INR"
+    },
+    "id": "extra_phonepe_15",
+    "sourcePackage": "com.phonepe.app"
+  },
+  {
+    "category": "phonepe",
+    "input": "Received ₹49.00 from uncle",
+    "expected": {
+      "amount": -4900,
+      "currency": "INR"
+    },
+    "id": "extra_phonepe_27",
+    "sourcePackage": "com.phonepe.app"
+  },
+  {
+    "category": "phonepe",
+    "input": "Received ₹435.00 from uncle",
+    "expected": {
+      "amount": -43500,
+      "currency": "INR"
+    },
+    "id": "extra_phonepe_3",
+    "sourcePackage": "com.phonepe.app"
+  },
+  {
+    "category": "phonepe",
+    "input": "Received ₹190.00 from uncle",
+    "expected": {
+      "amount": -19000,
+      "currency": "INR"
+    },
+    "id": "extra_phonepe_39",
+    "sourcePackage": "com.phonepe.app"
+  },
+  {
+    "category": "phonepe",
+    "input": "Received ₹376.00 from uncle",
+    "expected": {
+      "amount": -37600,
+      "currency": "INR"
+    },
+    "id": "extra_phonepe_51",
+    "sourcePackage": "com.phonepe.app"
+  },
+  {
+    "category": "phonepe",
+    "input": "Received ₹1,000 from Rohit",
+    "expected": {
+      "amount": -100000,
+      "currency": "INR"
+    },
+    "id": "phonepe_credit_1",
+    "sourcePackage": "com.phonepe.app"
+  }
+]

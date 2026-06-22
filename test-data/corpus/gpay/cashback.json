@@ -1,0 +1,22 @@
+[
+  {
+    "category": "gpay",
+    "input": "You paid ₹200 to Starbucks, you won ₹15 cashback!",
+    "expected": {
+      "amount": 20000,
+      "currency": "INR"
+    },
+    "id": "gpay_cashback_1",
+    "sourcePackage": "com.google.android.apps.nbu.paisa.user"
+  },
+  {
+    "category": "gpay",
+    "input": "You won ₹50 cashback from Google Pay",
+    "expected": {
+      "amount": -5000,
+      "currency": "INR"
+    },
+    "id": "gpay_cashback_2",
+    "sourcePackage": "com.google.android.apps.nbu.paisa.user"
+  }
+]

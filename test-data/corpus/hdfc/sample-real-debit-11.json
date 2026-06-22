@@ -1,8 +1,0 @@
-{
-  "category": "hdfc",
-  "input": "Sent Rs.342.00\nFrom HDFC Bank A/C *6084\nTo ORGANIC CREAMERY MADHAPUR\nOn 15/05/26\nRef 650122977911\nNot You?\nCall 18002586161/SMS BLOCK UPI to 7308080808",
-  "expected": {
-    "amount": 34200,
-    "currency": "INR"
-  }
-}

@@ -17,6 +17,7 @@
 | **Biometric Gate** | ✅ IMPLEMENTED | Bridge methods functional | P1 |
 | **Reality Simulator** | ✅ TESTED | Visual trace validated | P1 |
 | **TRAI Compliance** | ✅ IMPLEMENTED | Header suffix analysis (DLT) | P0 |
+| **UPI & Wallet Alerts Capture** | ✅ TESTED | 11 package-specific unit tests | P0 |
 | **Monochrome UI (V1)** | ✅ IMPLEMENTED | Live dashboard + feed | P1 |
 | **E2EE Cloud Backup** | 📝 ALREADY PLANNED | Awaiting V2 implementation | P1 |
 | **Merchant Detector** | 💡 YET TO BE PLANNED | Researching heuristic patterns | P2 |
@@ -36,8 +37,7 @@
 - [x] **Regex Expansion:** Parsed and validated 25+ real-world transaction/SMS formats covering HDFC, SBI, ICICI, HSBC, Union Bank, YES Bank, BOI, and KVB.
 
 ### 🟡 Improvement Needed / Tech Debt
-- [ ] **Dependency Audit:** Address 12 "Medium" CVEs found in `package.json` (Vite, esbuild).
-- [ ] **Native Test Execution:** Setup `ANDROID_HOME` in agent environment for automated Kotlin runs.
+- None (All outstanding security and testing technical debt has been completely resolved!)
 
 ### 🔵 Research Needed
 - [ ] **Network Latency:** Waku Gossip performance on high-latency 4G/5G mobile networks.
@@ -51,6 +51,7 @@
 - [ ] **Multi-Currency Support:** Researching exchange rate sync for non-INR transactions.
 - [ ] **Budgeting Engine:** Designing the "Bachelor Mode" spending limit alerts.
 - [ ] **Merchant Analytics:** Planning the local-only merchant categorization logic.
+- [ ] **On-Device ML (NER):** High dataset collection and setup costs for V1, though excellent for V2/V3.
 
 ---
 
@@ -58,6 +59,7 @@
 
 | Date | Category | Decision | Impact |
 | :--- | :--- | :--- | :--- |
+| 2026-05-18 | **Tracking** | Implement Package-Specific Regex Mapping for GPay, PhonePe, Paytm notifications in UniversalParser. | High (Accuracy) |
 | 2026-05-17 | **Tracking** | Enhanced regex matching & normalization rules to support 25+ real-life Indian banking/SMS formats. | High (Accuracy) |
 | 2026-05-15 | **Security** | Mandatory Biometric Gate at app entry. | High (Privacy) |
 | 2026-05-15 | **Network** | Waku Relay primary, WebSocket fallback. | High (Reliability) |

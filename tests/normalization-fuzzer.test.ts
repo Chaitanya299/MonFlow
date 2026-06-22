@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('react-native', () => ({
   NativeModules: {
@@ -10,6 +10,7 @@ vi.mock('react-native', () => ({
 }));
 
 import { UniversalParser } from '../src/domain/tracking/UniversalParser';
+import { Deduplicator } from '../src/domain/tracking/Deduplicator';
 
 /**
  * Monflo Normalization Fuzzer
@@ -18,7 +19,6 @@ import { UniversalParser } from '../src/domain/tracking/UniversalParser';
  * to ensure the Normalization layer is bulletproof.
  */
 describe('Normalization Fuzzing & Stress Test', () => {
-  const baseAmount = 1500.50;
   const expectedPaise = 150050;
 
   const variations = [
@@ -51,6 +51,10 @@ describe('Normalization Fuzzing & Stress Test', () => {
     'Rs. -1500.50'     // Rs. with space and negative
   ];
 
+  beforeEach(() => {
+    Deduplicator.clear();
+  });
+
   it('should normalize and parse 100% of fuzzed variations correctly', () => {
     console.log('\n🚀 STARTING NORMALIZATION FUZZER');
     console.log('====================================');
@@ -59,7 +63,7 @@ describe('Normalization Fuzzing & Stress Test', () => {
 
     variations.forEach((variant, index) => {
       const input = `Paid ${variant} to Test`;
-      const result = UniversalParser.parse(input);
+      const result = UniversalParser.parse(input, 'app');
 
       const success = result?.amountPaise === expectedPaise || result?.amountPaise === -expectedPaise;
 
@@ -79,8 +83,8 @@ describe('Normalization Fuzzing & Stress Test', () => {
   });
 
   it('should handle zero amounts and edge decimals', () => {
-    expect(UniversalParser.parse('Paid ₹0.00')?.amountPaise).toBe(0);
-    expect(UniversalParser.parse('Paid ₹0.01')?.amountPaise).toBe(1);
-    expect(UniversalParser.parse('Paid ₹0.1')?.amountPaise).toBe(10);
+    expect(UniversalParser.parse('Paid ₹0.00', 'app')?.amountPaise).toBe(0);
+    expect(UniversalParser.parse('Paid ₹0.01', 'app')?.amountPaise).toBe(1);
+    expect(UniversalParser.parse('Paid ₹0.1', 'app')?.amountPaise).toBe(10);
   });
 });

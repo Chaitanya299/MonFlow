@@ -1,8 +1,0 @@
-{
-  "category": "kvb",
-  "input": "Your a/c XXXXXXXXXXXX4430 is debited Rs. 1450.00 on 16-May-2026 to GUDLA  AMMAJAMMA info :P2A/650247179317. Avl Bal INR 7255.11 Not You? call 18005721916-KVB",
-  "expected": {
-    "amount": 145000,
-    "currency": "INR"
-  }
-}

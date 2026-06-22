@@ -1,0 +1,22 @@
+[
+  {
+    "category": "paytm",
+    "input": "Received ₹100 from Friend into Paytm Wallet",
+    "expected": {
+      "amount": -10000,
+      "currency": "INR"
+    },
+    "id": "paytm_credit_1",
+    "sourcePackage": "net.one97.paytm"
+  },
+  {
+    "category": "paytm",
+    "input": "₹500 credited to your Paytm Wallet",
+    "expected": {
+      "amount": -50000,
+      "currency": "INR"
+    },
+    "id": "paytm_credit_2",
+    "sourcePackage": "net.one97.paytm"
+  }
+]

@@ -1,8 +1,0 @@
-{
-  "category": "icici",
-  "input": "i-Safe: Trans of INR 450.75 on ICICI Bank Card XX1001. Merchant: AMAZON PAY.",
-  "expected": {
-    "amount": 45075,
-    "currency": "INR"
-  }
-}

@@ -1,8 +1,0 @@
-{
-  "category": "union",
-  "input": "A/c *1114 Debited for Rs:500.00 on 13-05-2026 17:05:09 by Mob Bk ref no 709515471120 Avl Bal Rs:20.55.If not you, Call 1800222243 -Union Bank of India",
-  "expected": {
-    "amount": 50000,
-    "currency": "INR"
-  }
-}

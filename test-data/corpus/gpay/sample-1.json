@@ -1,8 +1,0 @@
-{
-  "category": "gpay",
-  "input": "Paid ₹1,500.50 to Zomato",
-  "expected": {
-    "amount": 150050,
-    "currency": "INR"
-  }
-}

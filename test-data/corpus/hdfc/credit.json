@@ -1,0 +1,68 @@
+[
+  {
+    "category": "hdfc",
+    "input": "Credit Alert! Rs.297.00 credited to HDFC Bank A/c XX9988",
+    "expected": {
+      "amount": -29700,
+      "currency": "INR"
+    },
+    "id": "extra_hdfc_19",
+    "sourcePackage": "sms:VM-HDFCBK-T"
+  },
+  {
+    "category": "hdfc",
+    "input": "Credit Alert! Rs.454.00 credited to HDFC Bank A/c XX9988",
+    "expected": {
+      "amount": -45400,
+      "currency": "INR"
+    },
+    "id": "extra_hdfc_31",
+    "sourcePackage": "sms:VM-HDFCBK-T"
+  },
+  {
+    "category": "hdfc",
+    "input": "Credit Alert! Rs.13.00 credited to HDFC Bank A/c XX9988",
+    "expected": {
+      "amount": -1300,
+      "currency": "INR"
+    },
+    "id": "extra_hdfc_43",
+    "sourcePackage": "sms:VM-HDFCBK-T"
+  },
+  {
+    "category": "hdfc",
+    "input": "Credit Alert! Rs.177.00 credited to HDFC Bank A/c XX9988",
+    "expected": {
+      "amount": -17700,
+      "currency": "INR"
+    },
+    "id": "extra_hdfc_7",
+    "sourcePackage": "sms:VM-HDFCBK-T"
+  },
+  {
+    "category": "hdfc",
+    "input": "Credit Alert! Rs.2000.00 credited to HDFC Bank A/c XX1234 on 16-May-26 from VPA user@upi",
+    "expected": {
+      "amount": -200000,
+      "currency": "INR"
+    },
+    "id": "hdfc_sms_credit_1",
+    "sourcePackage": "sms:VM-HDFCBK-T"
+  },
+  {
+    "category": "hdfc",
+    "input": "Credit Alert!\nRs.702.00 credited to HDFC Bank A/c XX6084 on 13-05-26 from VPA 8639853866@axl (UPI 863660968463)",
+    "expected": {
+      "amount": -70200,
+      "currency": "INR"
+    }
+  },
+  {
+    "category": "hdfc",
+    "input": "Credit Alert!\nRs.1750.00 credited to HDFC Bank A/c XX6084 on 13-05-26 from VPA 7893725627@ybl (UPI 264361623496)",
+    "expected": {
+      "amount": -175000,
+      "currency": "INR"
+    }
+  }
+]

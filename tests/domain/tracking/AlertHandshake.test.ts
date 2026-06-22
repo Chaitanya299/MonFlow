@@ -58,7 +58,7 @@ describe('AlertHandshake — runHandshake', () => {
 
   it('should filter out promotional alerts (not parse them)', async () => {
     mockBridge.getPendingAlerts.mockResolvedValue([
-      { id: 1, rawText: 'Congratulations! You won cashback of ₹50', packageName: 'com.paytm', timestamp: Date.now() },
+      { id: 1, rawText: 'Special offer: Get 50% discount on orders using code PROMO1!', packageName: 'com.paytm', timestamp: Date.now() },
     ]);
     mockBridge.clearProcessedAlerts.mockResolvedValue(undefined);
 

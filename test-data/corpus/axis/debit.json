@@ -1,0 +1,12 @@
+[
+  {
+    "category": "axis",
+    "input": "Your Axis Bank A/c *7890 debited for Rs 350.00 on 12-May-26 at Merchant Ref 9901",
+    "expected": {
+      "amount": 35000,
+      "currency": "INR"
+    },
+    "id": "axis_debit_1",
+    "sourcePackage": "sms:VM-AXISBK-T"
+  }
+]

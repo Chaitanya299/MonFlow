@@ -1,8 +1,0 @@
-{
-  "category": "hdfc",
-  "input": "Sent Rs.200.00\nFrom HDFC Bank A/C *6084\nTo Zepto\nOn 16/05/26\nRef 134956946180\nNot You?\nCall 18002586161/SMS BLOCK UPI to 7308080808",
-  "expected": {
-    "amount": 20000,
-    "currency": "INR"
-  }
-}

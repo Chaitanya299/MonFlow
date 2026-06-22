@@ -1,8 +1,0 @@
-{
-  "category": "boi",
-  "input": "BOI -  Rs.13000.00 Credited to your Ac XX1098 on 16-05-26 by UPI ref No.864252686863.Avl Bal 13002.00",
-  "expected": {
-    "amount": -1300000,
-    "currency": "INR"
-  }
-}

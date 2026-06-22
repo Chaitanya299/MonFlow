@@ -1,8 +1,0 @@
-{
-  "category": "union",
-  "input": "A/c *1114 Credited for Rs:250.00 on 27-04-2026 12:18:45 by Mob Bk ref no 882705383159 Avl Bal Rs:8852.55.Never Share OTP/PIN/CVV-Union Bank of India",
-  "expected": {
-    "amount": -25000,
-    "currency": "INR"
-  }
-}

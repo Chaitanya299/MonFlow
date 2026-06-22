@@ -1,8 +1,0 @@
-{
-  "category": "yesbank",
-  "input": "YES BANK Credit Card XX7615 MAY-26 statement: Total due INR 5239.00  Min due INR 200.00 Due by 03-JUN-2026. Please pay full outstanding including decimal value to avoid any penal charges. Password: First 4 characters of your name in CAPS followed by DOB in DDMM. http://1kx.in/YESBNK/meO9Qt",
-  "expected": {
-    "amount": 523900,
-    "currency": "INR"
-  }
-}

@@ -1,0 +1,46 @@
+[
+  {
+    "category": "hsbc",
+    "input": "INR 1140.00 is paid from HSBC account XXXXXX1006 to Yum Yum Tree on 08-May-26",
+    "expected": {
+      "amount": 114000,
+      "currency": "INR"
+    },
+    "id": "hsbc_debit_1",
+    "sourcePackage": "sms:VM-HSBCBK-T"
+  },
+  {
+    "category": "hsbc",
+    "input": "NR 1000.00 is paid from HSBC account XXXXXX1006 to BEHERA on 11-May-26",
+    "expected": {
+      "amount": 100000,
+      "currency": "INR"
+    },
+    "id": "hsbc_debit_2",
+    "sourcePackage": "sms:VM-HSBCBK-T"
+  },
+  {
+    "category": "hsbc",
+    "input": "NR 1000.00 is paid from HSBC account XXXXXX1006 to BEHERA TATHAGAT on 11-May-26 with ref 613101256215. If this is not done by you, call 18002673456 to report.",
+    "expected": {
+      "amount": 100000,
+      "currency": "INR"
+    }
+  },
+  {
+    "category": "hsbc",
+    "input": "INR 1140.00 is paid from HSBC account XXXXXX1006 to Yum Yum Tree Arabian Food Court on 08-May-26 with ref 275210596918. If this is not done by you, call 18002673456 to report.",
+    "expected": {
+      "amount": 114000,
+      "currency": "INR"
+    }
+  },
+  {
+    "category": "hsbc",
+    "input": "INR 1570.00 is paid from HSBC account XXXXXX1006 to TULALA HARSHA GUNA on 13-May-26 with ref 471067860684. If this is not done by you, call 18002673456 to report.",
+    "expected": {
+      "amount": 157000,
+      "currency": "INR"
+    }
+  }
+]

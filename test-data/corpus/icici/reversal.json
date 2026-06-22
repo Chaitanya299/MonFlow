@@ -1,0 +1,12 @@
+[
+  {
+    "category": "icici",
+    "input": "Reversal Alert! Rs 120.00 credited back to ICICI Bank Acct XX041 on 15-May-26",
+    "expected": {
+      "amount": -12000,
+      "currency": "INR"
+    },
+    "id": "icici_sms_reversal_1",
+    "sourcePackage": "sms:VM-ICICIB-T"
+  }
+]

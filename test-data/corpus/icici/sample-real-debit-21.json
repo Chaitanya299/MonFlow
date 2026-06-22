@@ -1,8 +1,0 @@
-{
-  "category": "icici",
-  "input": "ICICI Bank Acct XX329 debited for Rs 4999.00 on 16-May-26; SURYA FUEL STAT credited. UPI:976422063511. Call 18002662 for dispute. SMS BLOCK 329 to 9215676766",
-  "expected": {
-    "amount": 499900,
-    "currency": "INR"
-  }
-}

@@ -1,8 +1,0 @@
-{
-  "category": "sbi",
-  "input": "Your A/c XXXXXX1234 has been debited by Rs 2,500.00 on 2026-05-16. (Ref: 1234567890)",
-  "expected": {
-    "amount": 250000,
-    "currency": "INR"
-  }
-}

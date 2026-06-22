@@ -1,9 +1,0 @@
-{
-  "category": "sbi",
-  "sourcePackage": "sms:+919876543210",
-  "input": "SBI Alert! Your A/c has been debited for Rs 10,000.00. Click here to verify: http://bit.ly/fake-sbi",
-  "expected": {
-    "amount": 1000000,
-    "currency": "INR"
-  }
-}

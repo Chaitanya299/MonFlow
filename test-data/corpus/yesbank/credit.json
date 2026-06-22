@@ -1,0 +1,12 @@
+[
+  {
+    "category": "yesbank",
+    "input": "Rs.3000 credited to YES Bank A/c XX4567 on 12-May-26",
+    "expected": {
+      "amount": -300000,
+      "currency": "INR"
+    },
+    "id": "yesbank_credit_1",
+    "sourcePackage": "sms:VM-YESBNK-T"
+  }
+]

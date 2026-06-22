@@ -1,8 +1,0 @@
-{
-  "category": "icici",
-  "input": "Dear Customer, Acct XX329 is credited with Rs 10000.00 on 15-May-26 from SURYA FUEL STAT. UPI:006605302349-ICICI Bank.",
-  "expected": {
-    "amount": -1000000,
-    "currency": "INR"
-  }
-}

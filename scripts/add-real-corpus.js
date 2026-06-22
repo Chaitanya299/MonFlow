@@ -156,17 +156,92 @@ const SAMPLES = [
   }
 ];
 
+function getTargetFile(sample) {
+  const filename = (sample.filename || '').toLowerCase();
+  const input = (sample.input || '').toLowerCase();
+  const expected = sample.expected;
+
+  if (filename.includes('promo') || input.includes('promo')) {
+    return 'promo.json';
+  }
+  if (filename.includes('scam') || input.includes('fake-sbi')) {
+    return 'scam.json';
+  }
+  if (filename.includes('ignored') || filename.includes('info') || filename.includes('balance') || expected === null) {
+    return 'ignored.json';
+  }
+  if (filename.includes('refund') || input.includes('refund')) {
+    return 'refund.json';
+  }
+  if (filename.includes('reversal') || input.includes('reversal')) {
+    return 'reversal.json';
+  }
+  if (filename.includes('lite') || input.includes('lite:')) {
+    return 'upi_lite.json';
+  }
+  if (filename.includes('cashback')) {
+    return 'cashback.json';
+  }
+  if (filename.includes('statement')) {
+    return 'statement.json';
+  }
+  if (filename.includes('failed')) {
+    return 'failed.json';
+  }
+  if (filename.includes('credit') || input.includes('credited') || input.includes('received')) {
+    return 'credit.json';
+  }
+  if (filename.includes('debit') || input.includes('debited') || input.includes('sent') || input.includes('spent') || input.includes('paid')) {
+    return 'debit.json';
+  }
+
+  // Fallbacks
+  if (expected && expected.amount < 0) {
+    return 'credit.json';
+  }
+  if (expected && expected.amount > 0) {
+    return 'debit.json';
+  }
+
+  return 'unknown.json';
+}
+
 SAMPLES.forEach(sample => {
   const providerDir = path.join(CORPUS_DIR, sample.category);
   if (!fs.existsSync(providerDir)) {
     fs.mkdirSync(providerDir, { recursive: true });
   }
-  const filePath = path.join(providerDir, sample.filename);
-  fs.writeFileSync(filePath, JSON.stringify({
-    category: sample.category,
-    input: sample.input,
-    expected: sample.expected
-  }, null, 2));
-  console.log(`Created ${sample.category} sample: ${sample.filename}`);
+
+  const targetFile = getTargetFile(sample);
+  const filePath = path.join(providerDir, targetFile);
+
+  let existingSamples = [];
+  if (fs.existsSync(filePath)) {
+    try {
+      const content = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+      if (Array.isArray(content)) {
+        existingSamples = content;
+      }
+    } catch (e) {
+      console.warn(`Could not parse existing ${filePath}, starting fresh array.`);
+    }
+  }
+
+  const isDuplicate = existingSamples.some(s => s.input === sample.input);
+  if (!isDuplicate) {
+    const cleanSample = {
+      category: sample.category,
+      input: sample.input,
+      expected: sample.expected
+    };
+    if (sample.filename) {
+      cleanSample.id = sample.filename.replace('sample-', '').replace('.json', '');
+    }
+    existingSamples.push(cleanSample);
+    fs.writeFileSync(filePath, JSON.stringify(existingSamples, null, 2), 'utf-8');
+    console.log(`Added sample to ${sample.category}/${targetFile}: "${sample.input.substring(0, 40)}..."`);
+  } else {
+    console.log(`Duplicate skipped for ${sample.category}/${targetFile}`);
+  }
 });
 console.log('All real-life samples added to corpus successfully!');

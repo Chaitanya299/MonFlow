@@ -1,0 +1,12 @@
+[
+  {
+    "category": "yesbank",
+    "input": "Dear Customer, registration for SUPERMONEY has started for YES BANK. If it was not you, report to your bank. Do not share card details/OTP/CVV with anyone.",
+    "expected": null
+  },
+  {
+    "category": "yesbank",
+    "input": "Dear Customer, a cooling period limit of Rs. 5000 every 24 hours is applicable for the first 72 hours. Never share UPI PIN, CVV & OTP with anyone - YES BANK",
+    "expected": null
+  }
+]

@@ -12,7 +12,7 @@ type ParserState = 'INIT' | 'DEBIT' | 'CREDIT' | 'AMOUNT_FOUND' | 'STATUS_FOUND'
 
 export class FsmParser {
   private static DEBIT_KEYWORDS = new Set([
-    'paid', 'sent', 'debited', 'spent', 'transferred', 'charged', 'authorized',
+    'paid', 'sent', 'debited', 'spent', 'transferred', 'charged', 'authorized', 'txn',
     'bheja', 'nikale', 'kharch', 'kata' // Common transliterated Hindi/Hinglish debit keywords
   ]);
 

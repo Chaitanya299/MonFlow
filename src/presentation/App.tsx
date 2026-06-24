@@ -4,13 +4,14 @@ import { Dashboard } from './screens/Dashboard';
 import { UntaggedBucket } from './screens/UntaggedBucket';
 import { GroupInviteScreen } from './screens/GroupInviteScreen';
 import { PermissionsSetupScreen } from './screens/PermissionsSetupScreen';
+import { DevTestScreen } from './screens/DevTestScreen';
 import { SecurityManager } from '../domain/tracking/SecurityManager';
 import { RuleManager } from '../domain/tracking/RuleManager';
 import { InviteManager, InvitePayload } from '../domain/social/InviteManager';
 
 const { MonfloBridge } = NativeModules;
 
-type Screen = 'DASHBOARD' | 'UNTAGGED_BUCKET' | 'GROUP_INVITE' | 'PERMISSIONS_SETUP';
+type Screen = 'DASHBOARD' | 'UNTAGGED_BUCKET' | 'GROUP_INVITE' | 'PERMISSIONS_SETUP' | 'DEV_TEST';
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -105,12 +106,24 @@ const App = () => {
             setCurrentScreen('DASHBOARD');
           }}
         />
-      ) : <Dashboard onOpenUntagged={() => setCurrentScreen('UNTAGGED_BUCKET')} />;
+      ) : (
+        <Dashboard
+          onOpenUntagged={() => setCurrentScreen('UNTAGGED_BUCKET')}
+          onOpenDevTest={() => setCurrentScreen('DEV_TEST')}
+        />
+      );
     case 'UNTAGGED_BUCKET':
       return <UntaggedBucket onBack={() => setCurrentScreen('DASHBOARD')} />;
+    case 'DEV_TEST':
+      return <DevTestScreen onBack={() => setCurrentScreen('DASHBOARD')} />;
     case 'DASHBOARD':
     default:
-      return <Dashboard onOpenUntagged={() => setCurrentScreen('UNTAGGED_BUCKET')} />;
+      return (
+        <Dashboard
+          onOpenUntagged={() => setCurrentScreen('UNTAGGED_BUCKET')}
+          onOpenDevTest={() => setCurrentScreen('DEV_TEST')}
+        />
+      );
   }
 };
 

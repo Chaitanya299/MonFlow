@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -17,9 +17,22 @@ const repository = new NativeAccountingRepository();
 
 interface Props {
   onOpenUntagged: () => void;
+  onOpenDevTest?: () => void;
 }
 
-export const Dashboard: React.FC<Props> = ({ onOpenUntagged }) => {
+export const Dashboard: React.FC<Props> = ({ onOpenUntagged, onOpenDevTest }) => {
+  const tapCountRef = useRef(0);
+  const lastTapRef = useRef(0);
+
+  const handleTitlePress = () => {
+    const now = Date.now();
+    tapCountRef.current = (now - lastTapRef.current > 3000) ? 1 : tapCountRef.current + 1;
+    lastTapRef.current = now;
+    if (tapCountRef.current >= 5) {
+      tapCountRef.current = 0;
+      onOpenDevTest?.();
+    }
+  };
   const [transactions, setTransactions] = useState<ProcessedTransaction[]>([]);
   const [summary, setSummary] = useState<DailySummary | null>(null);
   const [untaggedCount, setUntaggedCount] = useState(0);
@@ -72,7 +85,9 @@ export const Dashboard: React.FC<Props> = ({ onOpenUntagged }) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.greeting}>Hello,</Text>
-        <Text style={styles.title}>Your Vault</Text>
+        <TouchableOpacity onPress={handleTitlePress} activeOpacity={1}>
+          <Text style={styles.title}>Your Vault</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.summaryCard}>

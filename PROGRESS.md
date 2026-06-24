@@ -21,6 +21,7 @@
 | **Monochrome UI (V1)** | ✅ IMPLEMENTED | Live dashboard + feed | P1 |
 | **iOS Automation (Shortcut)** | ✅ TESTED | Receiver + production parser integration | P0 |
 | **Merchant Detector** | ✅ TESTED | Trie + fuzzy matching, 50+ merchants, 26 tests | P0 |
+| **Android SMS Bridge** | ✅ TESTED | POSTs to Mac receiver, offline retry queue | P0 |
 | **E2EE Cloud Backup** | 📝 ALREADY PLANNED | Awaiting V2 implementation | P1 |
 | **Bluetooth Discovery** | 🧪 RESEARCH NEEDED | Investigating BLE power drain | P2 |
 
@@ -38,6 +39,7 @@
 - [x] **Regex Expansion:** Parsed and validated 25+ real-world transaction/SMS formats covering HDFC, SBI, ICICI, HSBC, Union Bank, YES Bank, BOI, and KVB.
 - [x] **iOS Shortcut Receiver:** Production parser integration (UniversalParser), SMS→Notes flow, durable raw logging, built-in dedup, "Txn" format support.
 - [x] **Merchant Detection:** Trie-based exact match + Levenshtein fuzzy match. 50+ Indian merchants, auto-categorization. <0.001ms per lookup (cached).
+- [x] **Android SMS Bridge:** POSTs SMS to Mac receiver. Offline retry queue (100 max), 3 retries per alert. Parity with iOS.
 
 ### 🟡 Improvement Needed / Tech Debt
 - None (All outstanding security and testing technical debt has been completely resolved!)
@@ -61,6 +63,7 @@
 
 | Date | Category | Decision | Impact |
 | :--- | :--- | :--- | :--- |
+| 2026-06-24 | **Android** | Android SMS bridge POSTs to same Mac receiver as iOS. Offline retry queue handles connectivity gracefully. | High (Parity, Reliability) |
 | 2026-06-24 | **Accounting** | Merchant detection uses Trie + Levenshtein (not regex). Avoids backtracking; scales to 1000s merchants offline. | High (Performance, Reliability) |
 | 2026-06-24 | **iOS** | iOS Shortcut receiver uses UniversalParser (not throwaway regex); durable raw log before parsing. | High (Accuracy, Reliability) |
 | 2026-06-24 | **Tracking** | Add "txn" as debit keyword in FsmParser and isCredit() for HDFC card alerts. | Medium (Coverage) |

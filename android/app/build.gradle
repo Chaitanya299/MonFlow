@@ -122,6 +122,7 @@ dependencies {
     implementation "net.zetetic:android-database-sqlcipher:4.5.4"
     implementation 'org.bitcoinj:bitcoinj-core:0.16.2'
     implementation "androidx.biometric:biometric-ktx:1.2.0-alpha05"
+    implementation 'org.json:json:20231013'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:5.11.0'

@@ -41,7 +41,7 @@ describe('AlertHandshake — runHandshake', () => {
 
     await runHandshake();
 
-    expect(console.log).toHaveBeenCalledWith('Parsed transaction: 50000 INR');
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Parsed transaction: 50000 INR'));
   });
 
   it('should clear all processed alert IDs after parsing', async () => {
@@ -108,7 +108,7 @@ describe('AlertHandshake — runHandshake', () => {
     await runHandshake();
 
     expect(console.log).toHaveBeenCalledTimes(1);
-    expect(console.log).toHaveBeenCalledWith('Parsed transaction: 10000 INR');
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Parsed transaction: 10000 INR'));
     expect(mockBridge.clearProcessedAlerts).toHaveBeenCalledWith([1, 2, 3]);
   });
 });

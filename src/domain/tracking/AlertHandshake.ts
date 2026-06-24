@@ -1,5 +1,6 @@
 import { NativeModules } from 'react-native';
 import { UniversalParser } from './UniversalParser';
+import { MerchantDetector } from './MerchantDetector';
 import { NativeAccountingRepository } from '../accounting/NativeAccountingRepository';
 import { ProcessedTransaction } from '../accounting/types';
 
@@ -33,13 +34,17 @@ export const runHandshake = async () => {
       if (!UniversalParser.isPromotional(alert.rawText, alert.packageName)) {
         const tx = UniversalParser.parse(alert.rawText, alert.packageName);
         if (tx) {
+          const detector = MerchantDetector.getInstance();
+          const merchantName = tx.events[0]?.merchantName || null;
+          const category = detector.categorize(merchantName);
+
           const processedTx: ProcessedTransaction = {
             id: `tx_${Date.now()}_${alert.id}`,
             amountPaise: tx.amountPaise,
             currency: tx.currency,
             trustLevel: tx.trustLevel,
-            merchantName: null, // To be refined by merchant detector in future
-            category: 'untagged',
+            merchantName,
+            category,
             tags: [],
             sourcePackage: alert.packageName,
             rawText: alert.rawText,
@@ -49,7 +54,7 @@ export const runHandshake = async () => {
           };
 
           await repository.save(processedTx);
-          console.log(`Parsed transaction: ${tx.amountPaise} ${tx.currency}`);
+          console.log(`Parsed transaction: ${tx.amountPaise} ${tx.currency} → ${category} (${merchantName})`);
         }
       }
       processedIds.push(alert.id);

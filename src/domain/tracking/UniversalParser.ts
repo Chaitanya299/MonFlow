@@ -211,7 +211,8 @@ export const UniversalParser = {
       lowerText.includes('debited') ||
       lowerText.includes('paid') ||
       lowerText.includes('spent') ||
-      lowerText.includes('sent')
+      lowerText.includes('sent') ||
+      lowerText.includes('txn')
     ) {
       if (lowerText.includes('credited to') || lowerText.includes('credited with') || lowerText.includes('refund') || lowerText.includes('reversal')) {
         return true;

@@ -2,6 +2,7 @@ package com.monflo.tracking
 
 import android.content.Context
 import android.content.Intent
+import androidx.core.app.NotificationManagerCompat
 import com.facebook.react.bridge.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -122,6 +123,14 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
         } catch (e: Exception) {
             promise.reject("SIGNING_ERROR", e.message)
         }
+    }
+
+    @ReactMethod
+    fun isNotificationListenerEnabled(promise: Promise) {
+        val enabled = NotificationManagerCompat
+            .getEnabledListenerPackages(reactApplicationContext)
+            .contains(reactApplicationContext.packageName)
+        promise.resolve(enabled)
     }
 
     // === Accounting Methods ===

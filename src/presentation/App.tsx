@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Text, TouchableOpacity, NativeModules, PermissionsAndroid } from 'react-native';
 import { Dashboard } from './screens/Dashboard';
 import { UntaggedBucket } from './screens/UntaggedBucket';
 import { GroupInviteScreen } from './screens/GroupInviteScreen';
+import { PermissionsSetupScreen } from './screens/PermissionsSetupScreen';
+import { DevTestScreen } from './screens/DevTestScreen';
 import { SecurityManager } from '../domain/tracking/SecurityManager';
 import { RuleManager } from '../domain/tracking/RuleManager';
 import { InviteManager, InvitePayload } from '../domain/social/InviteManager';
 
-type Screen = 'DASHBOARD' | 'UNTAGGED_BUCKET' | 'GROUP_INVITE';
+const { MonfloBridge } = NativeModules;
+
+type Screen = 'DASHBOARD' | 'UNTAGGED_BUCKET' | 'GROUP_INVITE' | 'PERMISSIONS_SETUP' | 'DEV_TEST';
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -29,10 +33,19 @@ const App = () => {
 
       // 3. Check biometric gate
       const authorized = await SecurityManager.checkGate();
-      if (authorized) {
-        setIsAuthenticated(true);
-      } else {
+      if (!authorized) {
         setError('Authentication failed. Please restart the app.');
+        return;
+      }
+      setIsAuthenticated(true);
+
+      // 4. Check if required permissions are already granted; if not, show setup screen
+      const [nlEnabled, smsGranted] = await Promise.all([
+        MonfloBridge?.isNotificationListenerEnabled() ?? Promise.resolve(false),
+        PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECEIVE_SMS),
+      ]);
+      if (!nlEnabled || !smsGranted) {
+        setCurrentScreen('PERMISSIONS_SETUP');
       }
     } catch (e) {
       console.error('Initialization error:', e);
@@ -78,6 +91,8 @@ const App = () => {
 
   // Render current screen
   switch (currentScreen) {
+    case 'PERMISSIONS_SETUP':
+      return <PermissionsSetupScreen onDone={() => setCurrentScreen('DASHBOARD')} />;
     case 'GROUP_INVITE':
       return pendingInvite ? (
         <GroupInviteScreen
@@ -91,12 +106,24 @@ const App = () => {
             setCurrentScreen('DASHBOARD');
           }}
         />
-      ) : <Dashboard onOpenUntagged={() => setCurrentScreen('UNTAGGED_BUCKET')} />;
+      ) : (
+        <Dashboard
+          onOpenUntagged={() => setCurrentScreen('UNTAGGED_BUCKET')}
+          onOpenDevTest={() => setCurrentScreen('DEV_TEST')}
+        />
+      );
     case 'UNTAGGED_BUCKET':
       return <UntaggedBucket onBack={() => setCurrentScreen('DASHBOARD')} />;
+    case 'DEV_TEST':
+      return <DevTestScreen onBack={() => setCurrentScreen('DASHBOARD')} />;
     case 'DASHBOARD':
     default:
-      return <Dashboard onOpenUntagged={() => setCurrentScreen('UNTAGGED_BUCKET')} />;
+      return (
+        <Dashboard
+          onOpenUntagged={() => setCurrentScreen('UNTAGGED_BUCKET')}
+          onOpenDevTest={() => setCurrentScreen('DEV_TEST')}
+        />
+      );
   }
 };
 

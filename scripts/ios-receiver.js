@@ -4,6 +4,7 @@
 // Then point your iPhone Shortcut at: http://YOUR_MAC_IP:3456/capture
 
 const http = require('http');
+const fs = require('fs');
 const { execSync } = require('child_process');
 
 const PORT = 3456;
@@ -61,23 +62,28 @@ function writeToNotes(sender, raw, parsed) {
     `---`,
     `📅 ${dateStr}`,
     `🏦 ${sender}`,
-    `${icon} ${amountStr.toUpperCase()} ${parsed.type.toUpperCase()}`,
+    `${icon} ${amountStr} ${parsed.type.toUpperCase()}`,
     parsed.balance_paise != null ? `💰 Bal: ₹${(parsed.balance_paise / 100).toFixed(2)}` : null,
     parsed.upi_ref ? `🔖 UPI Ref: ${parsed.upi_ref}` : null,
     parsed.account_last4 ? `💳 A/c: ****${parsed.account_last4}` : null,
     `📝 ${raw}`,
     `---`,
-  ].filter(Boolean).join('\\n');
+  ].filter(Boolean).join('\n');
 
+  // Write to temp file — avoids AppleScript string escaping issues with quotes/emoji/newlines
+  const tmpFile = `/tmp/monflo_entry_${Date.now()}.txt`;
+  fs.writeFileSync(tmpFile, entry, 'utf8');
+
+  const safeNoteName = noteName.replace(/"/g, '\\"');
   const script = `
 tell application "Notes"
-  set noteName to "${noteName}"
-  set noteBody to "${entry}"
+  set noteName to "${safeNoteName}"
+  set entryText to read POSIX file "${tmpFile}" as «class utf8»
   if (count of (notes whose name is noteName)) > 0 then
     set theNote to first note whose name is noteName
-    set body of theNote to (body of theNote) & return & return & noteBody
+    set body of theNote to (body of theNote) & return & return & entryText
   else
-    make new note with properties {name:noteName, body:noteBody}
+    make new note with properties {name:noteName, body:entryText}
   end if
 end tell
 `;
@@ -87,6 +93,8 @@ end tell
     console.log(`[OK] Written to Notes: "${noteName}"`);
   } catch (e) {
     console.error('[NOTES ERROR]', e.message);
+  } finally {
+    try { fs.unlinkSync(tmpFile); } catch (_) {}
   }
 }
 
@@ -98,8 +106,19 @@ const server = http.createServer((req, res) => {
     req.on('end', () => {
       try {
         const { text, sender } = JSON.parse(body);
-        console.log(`\n[RECEIVED] from=${sender}`);
-        console.log(`[SMS] ${text}`);
+        console.log(`\n[RECEIVED] from=${sender ?? '(none)'}`);
+        console.log(`[SMS] ${text ?? '(none)'}`);
+
+        // Fail loudly so the Shortcut surfaces the problem instead of writing a junk note
+        if (!text || !text.trim()) {
+          console.warn('[WARN] Empty message text — your Shortcut "text" field is not mapped to the message content.');
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            ok: false,
+            error: 'empty text — map the Shortcut "text" field to the message content (Shortcut Input), not an empty variable',
+          }));
+          return;
+        }
 
         const parsed = parse(text);
         console.log('[PARSED]', parsed);

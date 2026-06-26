@@ -61,8 +61,14 @@ export const PermissionsSetupScreen: React.FC<Props> = ({ onDone }) => {
     setPerms(prev => ({ ...prev, sms: granted }));
   };
 
-  const openNotificationSettings = () => {
-    Linking.openSettings();
+  const openNotificationSettings = async () => {
+    // Deep-link to the Notification Access toggle. Falls back to the app's
+    // settings page only if the native intent is unavailable.
+    try {
+      await MonfloBridge?.openNotificationListenerSettings();
+    } catch {
+      Linking.openSettings();
+    }
   };
 
   const allGranted = perms.notificationListener && perms.sms;

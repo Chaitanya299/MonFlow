@@ -5,13 +5,15 @@ import { UntaggedBucket } from './screens/UntaggedBucket';
 import { GroupInviteScreen } from './screens/GroupInviteScreen';
 import { PermissionsSetupScreen } from './screens/PermissionsSetupScreen';
 import { DevTestScreen } from './screens/DevTestScreen';
+import { LiveMonitorScreen } from './screens/LiveMonitorScreen';
+import { NotifSimulatorScreen } from './screens/NotifSimulatorScreen';
 import { SecurityManager } from '../domain/tracking/SecurityManager';
 import { RuleManager } from '../domain/tracking/RuleManager';
 import { InviteManager, InvitePayload } from '../domain/social/InviteManager';
 
 const { MonfloBridge } = NativeModules;
 
-type Screen = 'DASHBOARD' | 'UNTAGGED_BUCKET' | 'GROUP_INVITE' | 'PERMISSIONS_SETUP' | 'DEV_TEST';
+type Screen = 'DASHBOARD' | 'UNTAGGED_BUCKET' | 'GROUP_INVITE' | 'PERMISSIONS_SETUP' | 'DEV_TEST' | 'LIVE_MONITOR' | 'NOTIF_SIMULATOR';
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -22,6 +24,16 @@ const App = () => {
 
   const initializeApp = async () => {
     try {
+      // 0. Ensure the encrypted vault exists BEFORE any DB access. The SQLCipher
+      // DB passphrase is derived from Keystore-encrypted entropy; without an
+      // initialized vault the stored IV is empty and opening the DB throws
+      // "unsupported IV length: 0 bytes". This is idempotent — guarded by
+      // isVaultInitialized so it only generates entropy on first launch.
+      const vaultReady = await (MonfloBridge?.isVaultInitialized() ?? Promise.resolve(true));
+      if (!vaultReady) {
+        await MonfloBridge?.initializeVault();
+      }
+
       // 1. Load local rules for parser
       await RuleManager.loadLocalRules();
 
@@ -115,7 +127,17 @@ const App = () => {
     case 'UNTAGGED_BUCKET':
       return <UntaggedBucket onBack={() => setCurrentScreen('DASHBOARD')} />;
     case 'DEV_TEST':
-      return <DevTestScreen onBack={() => setCurrentScreen('DASHBOARD')} />;
+      return (
+        <DevTestScreen
+          onBack={() => setCurrentScreen('DASHBOARD')}
+          onOpenLiveMonitor={() => setCurrentScreen('LIVE_MONITOR')}
+          onOpenSimulator={() => setCurrentScreen('NOTIF_SIMULATOR')}
+        />
+      );
+    case 'LIVE_MONITOR':
+      return <LiveMonitorScreen onBack={() => setCurrentScreen('DEV_TEST')} />;
+    case 'NOTIF_SIMULATOR':
+      return <NotifSimulatorScreen onBack={() => setCurrentScreen('DEV_TEST')} />;
     case 'DASHBOARD':
     default:
       return (

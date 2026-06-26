@@ -21,9 +21,13 @@ const PARSER_VERSION = '3.0.0';
 const GPAY_PACKAGE = 'com.google.android.apps.nbu.paisa.user';
 const PHONEPE_PACKAGE = 'com.phonepe.app';
 const PAYTM_PACKAGE = 'net.one97.paytm';
+const HDFC_SMS_SENDER = 'sms:AD-HDFCBK-S';
 
 // Registry of platform-specific templates
 const TEMPLATE_REGISTRY: Record<string, { id: string; template: string }[]> = {
+  [HDFC_SMS_SENDER]: [
+    { id: 'hdfc_card_txn_at_merchant', template: 'Txn ₹{amount:currency} On HDFC Bank Card {card:string} At {merchant:string}' }
+  ],
   [GPAY_PACKAGE]: [
     { id: 'gpay_paid', template: 'you paid ₹{amount:currency} to {merchant:string}' },
     { id: 'gpay_paid_short', template: 'you paid ₹{amount:currency}' },

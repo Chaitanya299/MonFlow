@@ -1,7 +1,10 @@
 package com.monflo.tracking
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.provider.Settings
 import androidx.core.app.NotificationManagerCompat
 import com.facebook.react.bridge.*
 import kotlinx.coroutines.CoroutineScope
@@ -133,6 +136,43 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
         promise.resolve(enabled)
     }
 
+    /**
+     * Opens the system Notification Access settings. On Android 11+ this deep-links
+     * straight to Monflo's own listener toggle; older versions land on the full list.
+     * `Linking.openSettings()` from JS only opens the app detail page, which has no
+     * notification-listener toggle — hence this dedicated intent.
+     */
+    @ReactMethod
+    fun openNotificationListenerSettings(promise: Promise) {
+        val ctx = reactApplicationContext
+        try {
+            val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val component = ComponentName(ctx, MonfloNotificationService::class.java)
+                Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS).apply {
+                    putExtra(
+                        Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME,
+                        component.flattenToString()
+                    )
+                }
+            } else {
+                Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+            }
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            ctx.startActivity(intent)
+            promise.resolve(true)
+        } catch (e: Exception) {
+            // Fall back to the generic listener-settings list if the deep link fails
+            try {
+                val fallback = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                fallback.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                ctx.startActivity(fallback)
+                promise.resolve(true)
+            } catch (e2: Exception) {
+                promise.reject("SETTINGS_ERROR", e2.message)
+            }
+        }
+    }
+
     // === Accounting Methods ===
 
     @ReactMethod
@@ -233,6 +273,54 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
             } catch (e: Exception) {
                 promise.reject("DB_ERROR", e.message)
             }
+        }
+    }
+
+    // === Simulator Methods (dev only) ===
+
+    @ReactMethod
+    fun injectTestAlert(rawText: String, packageName: String, promise: Promise) {
+        scope.launch {
+            try {
+                NativeDatabase.getInstance(reactApplicationContext).rawAlertDao().insert(
+                    RawAlert(rawText = rawText, packageName = packageName, timestamp = System.currentTimeMillis())
+                )
+                promise.resolve(true)
+            } catch (e: Exception) {
+                promise.reject("DB_ERROR", e.message)
+            }
+        }
+    }
+
+    // Posts a REAL heads-up notification (HIGH-importance channel) so it shows in the
+    // notification shade AND as a pop-up. Note: packageName is always com.monflo — the OS
+    // won't let an app post "as" another app — so per-app parser routing is tested via
+    // injectTestAlert instead. This method is purely for visual notification realism.
+    @ReactMethod
+    fun postTestNotification(title: String, body: String, promise: Promise) {
+        try {
+            val ctx = reactApplicationContext
+            val nm = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+            val channelId = "monflo_sim_alerts"
+            nm.createNotificationChannel(
+                android.app.NotificationChannel(
+                    channelId, "Monflo Simulator", android.app.NotificationManager.IMPORTANCE_HIGH
+                )
+            )
+            nm.notify(
+                System.currentTimeMillis().toInt(),
+                android.app.Notification.Builder(ctx, channelId)
+                    .setContentTitle(title)
+                    .setContentText(body)
+                    .setStyle(android.app.Notification.BigTextStyle().bigText(body))
+                    .setSmallIcon(android.R.drawable.ic_dialog_email)
+                    .setPriority(android.app.Notification.PRIORITY_HIGH)
+                    .setAutoCancel(true)
+                    .build()
+            )
+            promise.resolve(true)
+        } catch (e: Exception) {
+            promise.reject("NOTIF_ERROR", e.message)
         }
     }
 

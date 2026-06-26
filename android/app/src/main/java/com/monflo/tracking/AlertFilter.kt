@@ -4,9 +4,12 @@ import android.os.Bundle
 
 object AlertFilter {
     val notificationAllowlist = setOf(
-        "com.google.android.apps.nbu.paisa", // GPay
-        "com.phonepe.app",
-        "com.paytm.app"
+        "com.google.android.apps.nbu.paisa.user", // GPay (consumer app — matches UniversalParser GPAY_PACKAGE)
+        "com.phonepe.app",                    // PhonePe
+        "com.paytm.app",                      // Paytm (legacy package alias)
+        "net.one97.paytm",                    // Paytm (current package)
+        "com.supermoney.app",                 // SuperMoney
+        "com.navi.android",                   // Navi
     )
 
     // SMS filters for common Indian bank identifiers

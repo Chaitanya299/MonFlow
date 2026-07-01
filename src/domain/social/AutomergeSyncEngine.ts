@@ -173,6 +173,15 @@ export class AutomergeSyncEngine implements CRDTSyncEngine {
   }
 
   /**
+   * Returns the group's E2EE secret so an invite link can carry it to joiners.
+   * Implementation-level accessor (not part of the CRDT sync contract) — kept
+   * off the interface because it exposes raw key material.
+   */
+  getSharedSecret(groupId: string): Uint8Array | undefined {
+    return this.sharedSecrets.get(groupId);
+  }
+
+  /**
    * Performance: Incremental saving and periodic compaction.
    */
   private async broadcastChange(groupId: string, doc: Automerge.Doc<SplitGroupDoc>): Promise<void> {

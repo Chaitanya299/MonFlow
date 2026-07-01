@@ -122,6 +122,7 @@ const App = () => {
         <Dashboard
           onOpenUntagged={() => setCurrentScreen('UNTAGGED_BUCKET')}
           onOpenDevTest={() => setCurrentScreen('DEV_TEST')}
+          onOpenPermissions={() => setCurrentScreen('PERMISSIONS_SETUP')}
         />
       );
     case 'UNTAGGED_BUCKET':
@@ -144,6 +145,7 @@ const App = () => {
         <Dashboard
           onOpenUntagged={() => setCurrentScreen('UNTAGGED_BUCKET')}
           onOpenDevTest={() => setCurrentScreen('DEV_TEST')}
+          onOpenPermissions={() => setCurrentScreen('PERMISSIONS_SETUP')}
         />
       );
   }

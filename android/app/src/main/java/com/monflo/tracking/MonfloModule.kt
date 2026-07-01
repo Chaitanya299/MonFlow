@@ -85,8 +85,10 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
         val intent = Intent(reactApplicationContext, MonfloNotificationService::class.java)
         if (enabled) {
             reactApplicationContext.startForegroundService(intent)
+            CaptureWatchdogWorker.schedulePeriodic(reactApplicationContext)
         } else {
             reactApplicationContext.stopService(intent)
+            CaptureWatchdogWorker.cancelPeriodic(reactApplicationContext)
         }
         promise.resolve(enabled)
     }
@@ -321,6 +323,46 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
             promise.resolve(true)
         } catch (e: Exception) {
             promise.reject("NOTIF_ERROR", e.message)
+        }
+    }
+
+    // === Capture Reliability Methods ===
+
+    @ReactMethod
+    fun getCaptureHealth(promise: Promise) {
+        val ctx = reactApplicationContext
+        val result = Arguments.createMap()
+        result.putDouble("lastHeartbeatMs", Heartbeat.lastHeartbeatMs(ctx).toDouble())
+        result.putDouble("lastWatchdogRunMs", Heartbeat.lastWatchdogRunMs(ctx).toDouble())
+        result.putDouble("nowMs", System.currentTimeMillis().toDouble())
+        result.putDouble("staleThresholdMs", Heartbeat.STALE_THRESHOLD_MS.toDouble())
+        promise.resolve(result)
+    }
+
+    @ReactMethod
+    fun isIgnoringBatteryOptimizations(promise: Promise) {
+        val ctx = reactApplicationContext
+        val pm = ctx.getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+        promise.resolve(pm.isIgnoringBatteryOptimizations(ctx.packageName))
+    }
+
+    /**
+     * Requests exemption from Doze/App Standby battery optimization. Without this,
+     * OEM power managers (Xiaomi/Samsung/Oppo/Vivo) are far more likely to kill the
+     * notification listener process outright, silently ending capture.
+     */
+    @ReactMethod
+    fun requestIgnoreBatteryOptimizations(promise: Promise) {
+        val ctx = reactApplicationContext
+        try {
+            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                data = android.net.Uri.parse("package:${ctx.packageName}")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            ctx.startActivity(intent)
+            promise.resolve(true)
+        } catch (e: Exception) {
+            promise.reject("BATTERY_SETTINGS_ERROR", e.message)
         }
     }
 

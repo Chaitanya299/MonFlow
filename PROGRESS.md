@@ -1,6 +1,6 @@
 # Monflo Project Progress Dashboard
 
-> **Version:** 1.0.0.0 (V1 Prototype) | **Last Updated:** 2026-06-24
+> **Version:** 1.0.0.0 (V1 Prototype) | **Last Updated:** 2026-06-28
 > **Status:** `V1_PROTOTYPE_COMPLETE` | **System Health:** 🟢 Optimal
 
 ---
@@ -22,6 +22,10 @@
 | **iOS Automation (Shortcut)** | ✅ TESTED | Receiver + production parser integration | P0 |
 | **Merchant Detector** | ✅ TESTED | Trie + fuzzy matching, 50+ merchants, 26 tests | P0 |
 | **Android SMS Bridge** | ✅ TESTED | POSTs to Mac receiver, offline retry queue | P0 |
+| **On-Device Test Runner** | ✅ IMPLEMENTED | 66 Hermes tests via 5-tap gesture | P1 |
+| **Live Monitor** | ✅ IMPLEMENTED | Polls DB 2s, raw vs parsed side-by-side | P1 |
+| **Notification Simulator** | 🟡 DEVICE VERIFY | 10 presets; real heads-up notif + DB inject | P1 |
+| **Capture Reliability (Watchdog)** | 🟡 DEVICE VERIFY | Listener rebind + WorkManager watchdog + battery exemption | P0 |
 | **E2EE Cloud Backup** | 📝 ALREADY PLANNED | Awaiting V2 implementation | P1 |
 | **Bluetooth Discovery** | 🧪 RESEARCH NEEDED | Investigating BLE power drain | P2 |
 
@@ -40,9 +44,16 @@
 - [x] **iOS Shortcut Receiver:** Production parser integration (UniversalParser), SMS→Notes flow, durable raw logging, built-in dedup, "Txn" format support.
 - [x] **Merchant Detection:** Trie-based exact match + Levenshtein fuzzy match. 50+ Indian merchants, auto-categorization. <0.001ms per lookup (cached).
 - [x] **Android SMS Bridge:** POSTs SMS to Mac receiver. Offline retry queue (100 max), 3 retries per alert. Parity with iOS.
+- [x] **On-Device Test Runner:** Hermes-native minitest shim runs 66 domain tests on-device (5-tap gesture on "Your Vault" → DevTestScreen). Confirms parser behaves identically under Hermes vs Node/Vitest.
+- [x] **Live Monitor:** Dev screen polls `getPendingAlerts()` every 2s, shows raw SMS/notification text beside `UniversalParser` output in real time. Read-only — never clears alerts.
+- [x] **GPay Package Fix:** Corrected notification allowlist + simulator preset to `com.google.android.apps.nbu.paisa.user` (matches `GPAY_PACKAGE`); GPay alerts now pass the allowlist and route to the gpay_paid template.
+- [x] **Capture Reliability (Watchdog):** Closes the biggest silent-failure risk in the app — OEM battery killers (Xiaomi/Samsung/Oppo/Vivo) routinely kill `NotificationListenerService` processes with no OS-level restart, silently ending capture with no visible sign. Four layers: (1) `onListenerConnected`/`onListenerDisconnected` override with `requestRebind()` — recovers from system-initiated disconnects; (2) 5-min in-process heartbeat (`Heartbeat.kt`) touched on connect + every alert, so a stale timestamp means the process died, not "no alerts happened"; (3) `CaptureWatchdogWorker` (WorkManager, 15-min periodic + immediate one-shot from `onDestroy`/`onTaskRemoved`) restarts the foreground service if the heartbeat is stale beyond 20 min and notification access is still granted; (4) `requestIgnoreBatteryOptimizations` bridge method + new "Unrestricted Battery" row in `PermissionsSetupScreen` — the actual root-cause fix, since Doze/App Standby exemption stops most OEM kills before they happen. `Dashboard` surfaces a "Capture may be paused" banner (reusing the existing fetch/refresh cadence, no new poll timer) when `getCaptureHealth()` reports a stale gap, routing straight back to permissions setup.
 
 ### 🟡 Improvement Needed / Tech Debt
-- None (All outstanding security and testing technical debt has been completely resolved!)
+- [ ] **Notification Simulator — device verify:** Built (10 presets: 5 UPI apps + 5 bank SMS). Tap row → inline parse (dedup cleared so re-parse works); 🔔 → real heads-up notification (HIGH-importance channel + POST_NOTIFICATIONS) + DB inject for accurate per-app parse in Live Monitor. Requires APK rebuild; pending on-device confirmation.
+- [ ] **Capture Reliability — device verify:** Rebind/watchdog/battery-exemption logic compiles clean but is untested on real OEM hardware (the actual failure mode it targets). Needs multi-hour/overnight soak tests on at least one Xiaomi/Oppo/Vivo device with the app backgrounded, plus manual "swipe from recents" and "force-stop then wait" checks. No Robolectric/instrumented test added — Context-dependent SharedPreferences/WorkManager logic isn't unit-testable without adding that dependency, which was out of scope for this change.
+- [ ] **SuperMoney + Navi parser templates:** No package-specific templates yet (only GPay/PhonePe/Paytm). Both fall to FSM fallback — fire those presets in the simulator and add templates based on actual output.
+- [ ] **`.gradle/` artifacts tracked in git:** Build caches dirty `git status` every build; should be gitignored + untracked.
 
 ### 🔵 Research Needed
 - [ ] **Network Latency:** Waku Gossip performance on high-latency 4G/5G mobile networks.
@@ -63,6 +74,11 @@
 
 | Date | Category | Decision | Impact |
 | :--- | :--- | :--- | :--- |
+| 2026-06-28 | **Android** | WorkManager (not raw AlarmManager) drives the capture watchdog — periodic minimum is 15 min either way, but WorkManager survives Doze/App Standby transitions and process death more reliably, and needs no manual manifest wiring beyond the dependency. | High (Reliability) |
+| 2026-06-28 | **Android** | Watchdog restarts the service unconditionally when the heartbeat is stale + listener permission is still granted, rather than trying to detect "is the service already running" first — `startForegroundService` on an already-alive service is a safe no-op, so the extra check would add complexity for no benefit. | Medium (Simplicity) |
+| 2026-06-27 | **Tracking** | Notification Simulator: 🔔 posts a real heads-up notification AND injects to DB with the correct package. Android won't let an app post "as" PhonePe (pkg is always com.monflo), so per-app routing is tested via the inject path, not the live notification. | Medium (Testability) |
+| 2026-06-27 | **Tracking** | Clear `Deduplicator` before each inline simulator parse. Parser dedupes any sourcePackage≠'app' within a 5-min window, so re-parsing the same preset returned null (false "PARSE FAILED"). | Medium (DevEx) |
+| 2026-06-27 | **Android** | Fix GPay package to `com.google.android.apps.nbu.paisa.user` in AlertFilter allowlist + simulator preset (was missing `.user`, so GPay alerts were dropped at the allowlist and never reached the gpay template). | High (Accuracy) |
 | 2026-06-24 | **Android** | Android SMS bridge POSTs to same Mac receiver as iOS. Offline retry queue handles connectivity gracefully. | High (Parity, Reliability) |
 | 2026-06-24 | **Accounting** | Merchant detection uses Trie + Levenshtein (not regex). Avoids backtracking; scales to 1000s merchants offline. | High (Performance, Reliability) |
 | 2026-06-24 | **iOS** | iOS Shortcut receiver uses UniversalParser (not throwaway regex); durable raw log before parsing. | High (Accuracy, Reliability) |

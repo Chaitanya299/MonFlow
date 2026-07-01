@@ -6,21 +6,24 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
-  TouchableOpacity
+  TouchableOpacity,
+  NativeModules,
 } from 'react-native';
 import { NativeAccountingRepository } from '../../domain/accounting/NativeAccountingRepository';
 import { ProcessedTransaction, DailySummary } from '../../domain/accounting/types';
 import { TransactionItem } from '../components/TransactionItem';
 import { runHandshake } from '../../domain/tracking/AlertHandshake';
 
+const { MonfloBridge } = NativeModules;
 const repository = new NativeAccountingRepository();
 
 interface Props {
   onOpenUntagged: () => void;
   onOpenDevTest?: () => void;
+  onOpenPermissions?: () => void;
 }
 
-export const Dashboard: React.FC<Props> = ({ onOpenUntagged, onOpenDevTest }) => {
+export const Dashboard: React.FC<Props> = ({ onOpenUntagged, onOpenDevTest, onOpenPermissions }) => {
   const tapCountRef = useRef(0);
   const lastTapRef = useRef(0);
 
@@ -38,6 +41,28 @@ export const Dashboard: React.FC<Props> = ({ onOpenUntagged, onOpenDevTest }) =>
   const [untaggedCount, setUntaggedCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [captureStale, setCaptureStale] = useState(false);
+
+  // Detects a silently-dead capture pipeline (OEM battery killer took out the
+  // notification listener process). Reuses this screen's own fetch/refresh
+  // cadence instead of adding a separate poll timer.
+  const checkCaptureHealth = async () => {
+    try {
+      const trackingEnabled = await (MonfloBridge?.isTrackingEnabled?.() ?? Promise.resolve(false));
+      if (!trackingEnabled) {
+        setCaptureStale(false);
+        return;
+      }
+      const health = await MonfloBridge?.getCaptureHealth?.();
+      if (!health || health.lastHeartbeatMs === 0) {
+        setCaptureStale(false); // never started yet — not a failure
+        return;
+      }
+      setCaptureStale(health.nowMs - health.lastHeartbeatMs > health.staleThresholdMs);
+    } catch {
+      setCaptureStale(false);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -50,7 +75,8 @@ export const Dashboard: React.FC<Props> = ({ onOpenUntagged, onOpenDevTest }) =>
       const [txs, daySummary, untagged] = await Promise.all([
         repository.getByDateRange(now.getTime() - 7 * 24 * 60 * 60 * 1000, now.getTime() + 10000),
         repository.getDailySummary(todayStr),
-        repository.getUntagged()
+        repository.getUntagged(),
+        checkCaptureHealth(),
       ]);
 
       setTransactions(txs);
@@ -100,6 +126,15 @@ export const Dashboard: React.FC<Props> = ({ onOpenUntagged, onOpenDevTest }) =>
           <Text style={styles.summarySubtext}>100% Local</Text>
         </View>
       </View>
+
+      {captureStale && (
+        <TouchableOpacity style={styles.captureWarningBanner} onPress={onOpenPermissions}>
+          <Text style={styles.captureWarningText}>
+            Capture may be paused — tap to check permissions
+          </Text>
+          <Text style={styles.captureWarningAction}>FIX →</Text>
+        </TouchableOpacity>
+      )}
 
       {untaggedCount > 0 && (
         <TouchableOpacity style={styles.alertBanner} onPress={onOpenUntagged}>
@@ -208,6 +243,30 @@ const styles = StyleSheet.create({
   alertAction: {
     fontSize: 12,
     color: '#ef6c00',
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  captureWarningBanner: {
+    backgroundColor: '#ffebee',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ffcdd2',
+  },
+  captureWarningText: {
+    fontSize: 14,
+    color: '#c62828',
+    fontWeight: '600',
+    flex: 1,
+    marginRight: 8,
+  },
+  captureWarningAction: {
+    fontSize: 12,
+    color: '#b71c1c',
     fontWeight: '800',
     letterSpacing: 1,
   },

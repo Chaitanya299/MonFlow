@@ -11,6 +11,7 @@ class BootReceiver : BroadcastReceiver() {
             if (prefs.getBoolean("isTrackingEnabled", false)) {
                 val serviceIntent = Intent(context, MonfloNotificationService::class.java)
                 context.startForegroundService(serviceIntent)
+                CaptureWatchdogWorker.schedulePeriodic(context)
             }
         }
     }

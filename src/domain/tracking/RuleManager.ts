@@ -89,11 +89,6 @@ export class RuleManager {
   }
 
   private static decodeBase64(base64: string): Uint8Array {
-    const binaryString = atob(base64);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    return bytes;
+    return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
   }
 }

@@ -13,6 +13,7 @@ local.properties
 # IDEs and AI tools config
 .claude-flow/
 .claude/
+.gstack/
 .claudeignore
 .cursor/
 .cursorrules

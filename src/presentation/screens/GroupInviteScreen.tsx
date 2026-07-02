@@ -8,7 +8,7 @@ import {
   SafeAreaView,
   Alert
 } from 'react-native';
-import { InvitePayload } from '../../domain/social/InviteManager';
+import { InvitePayload, base64ToBytes } from '../../domain/social/InviteManager';
 import { AutomergeSyncEngine } from '../../domain/social/AutomergeSyncEngine';
 import { WakuProvider } from '../../domain/social/network/WakuProvider';
 import { RelayClient } from '../../domain/social/network/RelayClient';
@@ -32,12 +32,11 @@ export const GroupInviteScreen: React.FC<Props> = ({ payload, onDone, onCancel }
   const handleJoin = async () => {
     setJoining(true);
     try {
-      // In a real app, the shared secret would be derived from the inviteKey
-      // or included in the link (encrypted for the user).
-      // Here we'll use a placeholder secret.
-      const placeholderSecret = new Uint8Array(32).fill(1);
+      // The group's real E2EE secret travels in the invite link (already
+      // validated as 32 bytes by InviteManager.parseInviteLink).
+      const sharedSecret = base64ToBytes(payload.sharedSecret);
 
-      await syncEngine.joinGroupFromInvite(payload.groupId, placeholderSecret);
+      await syncEngine.joinGroupFromInvite(payload.groupId, sharedSecret);
 
       Alert.alert(
         'Joined!',

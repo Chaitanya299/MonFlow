@@ -121,7 +121,7 @@ const App = () => {
       ) : (
         <Dashboard
           onOpenUntagged={() => setCurrentScreen('UNTAGGED_BUCKET')}
-          onOpenDevTest={() => setCurrentScreen('DEV_TEST')}
+          onOpenDevTest={__DEV__ ? () => setCurrentScreen('DEV_TEST') : undefined}
           onOpenPermissions={() => setCurrentScreen('PERMISSIONS_SETUP')}
         />
       );
@@ -144,7 +144,7 @@ const App = () => {
       return (
         <Dashboard
           onOpenUntagged={() => setCurrentScreen('UNTAGGED_BUCKET')}
-          onOpenDevTest={() => setCurrentScreen('DEV_TEST')}
+          onOpenDevTest={__DEV__ ? () => setCurrentScreen('DEV_TEST') : undefined}
           onOpenPermissions={() => setCurrentScreen('PERMISSIONS_SETUP')}
         />
       );

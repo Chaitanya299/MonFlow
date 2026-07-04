@@ -1,7 +1,7 @@
 # Monflo Project Progress Dashboard
 
-> **Version:** 1.0.0.0 (V1 Prototype) | **Last Updated:** 2026-06-28
-> **Status:** `V1_PROTOTYPE_COMPLETE` | **System Health:** 🟢 Optimal
+> **Version:** 1.0.0.0 (V1 Prototype) | **Last Updated:** 2026-07-04
+> **Status:** `LAUNCH_READY_MINUS_RELEASE_HYGIENE` | **System Health:** 🟢 Core Solid / ⚠️ Wrapper Issues
 
 ---
 
@@ -53,7 +53,26 @@
 - [ ] **Notification Simulator — device verify:** Built (10 presets: 5 UPI apps + 5 bank SMS). Tap row → inline parse (dedup cleared so re-parse works); 🔔 → real heads-up notification (HIGH-importance channel + POST_NOTIFICATIONS) + DB inject for accurate per-app parse in Live Monitor. Requires APK rebuild; pending on-device confirmation.
 - [ ] **Capture Reliability — device verify:** Rebind/watchdog/battery-exemption logic compiles clean but is untested on real OEM hardware (the actual failure mode it targets). Needs multi-hour/overnight soak tests on at least one Xiaomi/Oppo/Vivo device with the app backgrounded, plus manual "swipe from recents" and "force-stop then wait" checks. No Robolectric/instrumented test added — Context-dependent SharedPreferences/WorkManager logic isn't unit-testable without adding that dependency, which was out of scope for this change.
 - [ ] **SuperMoney + Navi parser templates:** No package-specific templates yet (only GPay/PhonePe/Paytm). Both fall to FSM fallback — fire those presets in the simulator and add templates based on actual output.
-- [ ] **`.gradle/` artifacts tracked in git:** Build caches dirty `git status` every build; should be gitignored + untracked.
+
+### 🟡 Release-Blocking Issues (Pre-Launch Fixes)
+- ✅ **RESOLVED (2026-07-02):** Native notification allowlist had **wrong package IDs** (GPay missing `.user` suffix, Paytm listed as `com.paytm.app` instead of `net.one97.paytm`) — only PhonePe was capturable on a real device. Fixed in [AlertFilter.kt](android/app/src/main/java/com/monflo/tracking/AlertFilter.kt); Kotlin tests updated to the real IDs plus a regression test rejecting the stale GPay ID. **Still pending: real-device smoke test (₹1 through each app).**
+- ✅ **RESOLVED (2026-07-03):** Unparsed alerts were **silently deleted** — the handshake now saves parser misses as raw `untagged` transactions (amount 0, tag `unparsed`) so they surface in the Untagged Bucket, and a per-alert try/catch stops one malformed alert from stalling the whole inbox. Field miss-rate is measurable via `TelemetryReporter.getMetrics().totalFailures`.
+- ✅ **RESOLVED (2026-07-02):** Listener now auto-rebinds via `onListenerDisconnected` + `requestRebind` (OEM battery-kill recovery), prefers `android.bigText` over truncated `android.text`, and `bridge` is lazily initialized (rebind path never calls `onStartCommand`, which previously left the `lateinit` unset → crash). Bank SMS are now captured **without SMS permissions** via Google/Samsung Messages notifications, gated by `isRelevantSms` so personal texts never enter the vault; credit keywords (`credited`, `received`, `withdrawn`) added so income alerts pass the filter.
+- **CRITICAL:** Release build signs with **debug keystore** — must generate production keystore + update gradle config
+- **CRITICAL:** `versionCode 1`, versions misaligned (package.json `0.1.1.0`, PROGRESS `1.0.0.0`, gradle `1.0`) — standardize
+- **CRITICAL:** `targetSdkVersion 34` → Google Play now requires **API 35** for new submissions (and API 40+ by 2026-Q3)
+- ✅ **RESOLVED (2026-07-03):** Dev Mac bridge (`postAlert`) is now gated behind `BuildConfig.DEBUG` — release builds never transmit alerts off-device, so the "100% local" claim and a "no data collected" Play Data Safety declaration hold. Dev workflow unchanged in debug builds.
+- **CRITICAL:** `RECEIVE_SMS`/`READ_SMS` in manifest — **Google Play will reject** for expense tracking (SMS not an approved use case). Decision: Play flavor notification-listener-only, keep SMS for sideload/beta
+- ✅ **RESOLVED (2026-07-03):** DevTestScreen 5-tap gesture is gated behind `__DEV__` — unreachable in release builds, still available for on-device test runs in debug. Also fixed: `MerchantDetector` imported `TransactionCategory` from the wrong module (compiled under vitest only because it skips typechecking).
+- **HIGH:** `MonfloBridgeService` initialized only in `onStartCommand` — if NotificationListenerService rebinds without that path, first notification throws and kills service. Fix: move init to companion object or lazy-init with fallback
+- **HIGH:** CI missing Kotlin tests + lint + tsc — only `npm test` runs; add `./gradlew testDebugUnitTest` and typecheck
+- **MEDIUM:** No encrypted export/backup — user loses all history if phone is lost. Consider V1 CSV/JSON export before V2 cloud backup
+- **MEDIUM:** Play Store paperwork (privacy policy URL, Data Safety form, NotificationListener justification) not started
+
+### 🟡 Maturity & Unproven Components
+- **Waku P2P Sync:** contract tests pass, but no field data on mobile 4G/5G latency or OEM biometric consistency. Consider feature-flagged launch (tracker only) to decouple sync risk
+- **iOS:** Not a product for V1 — Shortcut + Mac receiver only. Revisit for V2 native iOS app if user demand justifies
+- **Merchant Detection:** Trie + fuzzy matching tested in isolation; not battle-tested against live transaction volume or localized merchant variants
 
 ### 🔵 Research Needed
 - [ ] **Network Latency:** Waku Gossip performance on high-latency 4G/5G mobile networks.
@@ -74,6 +93,11 @@
 
 | Date | Category | Decision | Impact |
 | :--- | :--- | :--- | :--- |
+| 2026-07-04 | **Testing** | Added dev "Capture Lab" (5-tap → Dev screen): 4 capture-source test modes (`CaptureConfig` in SharedPreferences, honored live by native services) + CSV export of every captured txn (raw → parsed) via RN `Share`. Default mode ALL = unchanged production behavior. | High (Field validation) |
+| 2026-07-04 | **Accounting** | Expanded merchant rules to ~60 vendor groups; grouped quick-commerce grocery (Blinkit/Zepto/Instamart/BigBasket/Dunzo) under **food** — moved Blinkit/BigBasket out of `shopping` for budgeting-accurate "food & groceries". | Medium (Categorization accuracy) |
+| 2026-07-02 | **Tracking** | 3-tier notification allowlist: pure-payment apps (GPay/PhonePe/Paytm/BHIM/super.money/Navi) captured raw; SMS apps + mixed apps (WhatsApp/CRED/iMobile/Amazon) captured only through the money-relevance gate so chats/orders/promos never enter the vault. All package IDs Play-Store-verified. | High (Coverage, Privacy) |
+| 2026-07-02 | **Tracking** | Capture bank SMS via SMS-app notifications (Google/Samsung Messages allowlist) instead of SMS permissions — the Play-compliant universal fallback. Routed as `sms:<sender>` so TRAI trust analysis applies. | High (Play Compliance, Coverage) |
+| 2026-07-02 | **Tracking** | Corrected GPay/Paytm package IDs in native allowlist; listener auto-rebind for OEM battery kills; bigText extraction for long alerts. | High (Capture Reliability) |
 | 2026-06-28 | **Android** | WorkManager (not raw AlarmManager) drives the capture watchdog — periodic minimum is 15 min either way, but WorkManager survives Doze/App Standby transitions and process death more reliably, and needs no manual manifest wiring beyond the dependency. | High (Reliability) |
 | 2026-06-28 | **Android** | Watchdog restarts the service unconditionally when the heartbeat is stale + listener permission is still granted, rather than trying to detect "is the service already running" first — `startForegroundService` on an already-alive service is a safe no-op, so the extra check would add complexity for no benefit. | Medium (Simplicity) |
 | 2026-06-27 | **Tracking** | Notification Simulator: 🔔 posts a real heads-up notification AND injects to DB with the correct package. Android won't let an app post "as" PhonePe (pkg is always com.monflo), so per-app routing is tested via the inject path, not the live notification. | Medium (Testability) |

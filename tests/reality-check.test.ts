@@ -40,7 +40,7 @@ const renderUIPreview = (tx: any) => {
 describe('Monflo Reality Simulator', () => {
   it('Scenario 1: Standard GPay Transaction', async () => {
     const rawMessage = 'Paid ₹1,500.50 to Zomato';
-    const pkg = 'com.google.android.apps.nbu.paisa';
+    const pkg = 'com.google.android.apps.nbu.paisa.user';
 
     console.log('\n🚀 \x1b[1mREALITY CHECK: GPay Payment Flow\x1b[0m');
     console.log('==========================================');
@@ -87,7 +87,7 @@ describe('Monflo Reality Simulator', () => {
     logStep('1: TRIGGER', `System Notification popup: "${spamMessage}"`);
 
     mockBridge.getPendingAlerts.mockResolvedValue([
-      { id: 102, rawText: spamMessage, packageName: 'com.paytm.app', timestamp: Date.now() }
+      { id: 102, rawText: spamMessage, packageName: 'net.one97.paytm', timestamp: Date.now() }
     ]);
 
     logStep('2: BRAIN', 'Analyzing for promotional keywords...');

@@ -131,6 +131,17 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     }
 
     @ReactMethod
+    fun setCaptureMode(mode: String, promise: Promise) {
+        CaptureConfig.setMode(reactApplicationContext, mode)
+        promise.resolve(CaptureConfig.getMode(reactApplicationContext))
+    }
+
+    @ReactMethod
+    fun getCaptureMode(promise: Promise) {
+        promise.resolve(CaptureConfig.getMode(reactApplicationContext))
+    }
+
+    @ReactMethod
     fun isNotificationListenerEnabled(promise: Promise) {
         val enabled = NotificationManagerCompat
             .getEnabledListenerPackages(reactApplicationContext)

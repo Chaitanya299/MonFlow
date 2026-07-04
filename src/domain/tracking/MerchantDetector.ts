@@ -1,4 +1,4 @@
-import { TransactionCategory } from './types';
+import { TransactionCategory } from '../accounting/types';
 import merchantRulesData from './merchant-rules.json';
 
 interface MerchantRule {

@@ -14,6 +14,9 @@ class SmsReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
 
+        // Capture-mode gate: skip when the direct SMS-receiver source is disabled
+        if (!CaptureConfig.isSmsReceiverEnabled(context)) return
+
         val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
         for (sms in messages) {
             val sender = sms.originatingAddress

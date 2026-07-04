@@ -162,6 +162,54 @@ describe('MerchantDetector', () => {
     });
   });
 
+  describe('named vendors (request: swiggy, instamart, zepto, blinkit, uber…)', () => {
+    it('food delivery → food', () => {
+      expect(detector.categorize('Swiggy')).toBe('food');
+      expect(detector.categorize('Zomato')).toBe('food');
+    });
+
+    it('quick-commerce groceries → food', () => {
+      expect(detector.categorize('Zepto')).toBe('food');
+      expect(detector.categorize('Instamart')).toBe('food');
+      expect(detector.categorize('Blinkit')).toBe('food');
+      expect(detector.categorize('BigBasket')).toBe('food');
+      expect(detector.categorize('Dunzo')).toBe('food');
+    });
+
+    it('ride-hailing → transport', () => {
+      expect(detector.categorize('Uber')).toBe('transport');
+      expect(detector.categorize('Ola')).toBe('transport');
+      expect(detector.categorize('Rapido')).toBe('transport');
+    });
+
+    it('fuel → transport', () => {
+      expect(detector.categorize('Indian Oil')).toBe('transport');
+      expect(detector.categorize('HPCL')).toBe('transport');
+    });
+
+    it('marketplaces → shopping', () => {
+      expect(detector.categorize('Nykaa')).toBe('shopping');
+      expect(detector.categorize('Croma')).toBe('shopping');
+      expect(detector.categorize('Meesho')).toBe('shopping');
+    });
+
+    it('streaming → entertainment', () => {
+      expect(detector.categorize('Netflix')).toBe('entertainment');
+      expect(detector.categorize('SonyLIV')).toBe('entertainment');
+      expect(detector.categorize('BookMyShow')).toBe('entertainment');
+    });
+
+    it('pharmacy/health → health', () => {
+      expect(detector.categorize('PharmEasy')).toBe('health');
+      expect(detector.categorize('Practo')).toBe('health');
+    });
+
+    it('fuzzy tolerates casing/spacing variants', () => {
+      expect(detector.categorize('BIG BASKET')).toBe('food');
+      expect(detector.categorize('rapidoo')).toBe('transport');
+    });
+  });
+
   describe('performance', () => {
     it('should categorize in <5ms on average', () => {
       const merchant = 'Amazon Pay';

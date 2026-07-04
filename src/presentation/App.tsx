@@ -109,7 +109,7 @@ const App = () => {
       ) : (
         <Dashboard
           onOpenUntagged={() => setCurrentScreen('UNTAGGED_BUCKET')}
-          onOpenDevTest={() => setCurrentScreen('DEV_TEST')}
+          onOpenDevTest={__DEV__ ? () => setCurrentScreen('DEV_TEST') : undefined}
         />
       );
     case 'UNTAGGED_BUCKET':
@@ -121,7 +121,7 @@ const App = () => {
       return (
         <Dashboard
           onOpenUntagged={() => setCurrentScreen('UNTAGGED_BUCKET')}
-          onOpenDevTest={() => setCurrentScreen('DEV_TEST')}
+          onOpenDevTest={__DEV__ ? () => setCurrentScreen('DEV_TEST') : undefined}
         />
       );
   }

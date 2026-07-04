@@ -3,14 +3,42 @@ package com.monflo.tracking
 import android.os.Bundle
 
 object AlertFilter {
+    // Tier 1 — pure payment apps: effectively every notification is a transaction
+    // alert, so capture raw. Occasional reward/promo notifications are dropped
+    // downstream by UniversalParser.isPromotional during the JS handshake.
     val notificationAllowlist = setOf(
-        "com.google.android.apps.nbu.paisa", // GPay
-        "com.phonepe.app",
-        "com.paytm.app"
+        "com.google.android.apps.nbu.paisa.user", // GPay (India)
+        "com.phonepe.app",                        // PhonePe
+        "net.one97.paytm",                        // Paytm
+        "in.org.npci.upiapp",                     // BHIM (NPCI)
+        "money.super.payments",                   // super.money (Flipkart)
+        "com.naviapp"                             // Navi
     )
 
-    // SMS filters for common Indian bank identifiers
-    private val smsKeywords = setOf("debited", "spent", "sent", "transaction", "paid")
+    // Tier 2 — SMS apps: bank alerts reach us through their notifications without
+    // needing SMS permissions (Play-compliant capture path). Routed as "sms:<sender>"
+    // so the JS parser applies TRAI header trust analysis.
+    val smsAppAllowlist = setOf(
+        "com.google.android.apps.messaging", // Google Messages
+        "com.samsung.android.messaging"      // Samsung Messages
+    )
+
+    // Tier 3 — mixed-content apps: most of their notifications are NOT financial
+    // (chats, order/delivery updates, reward promos). Captured only when the text
+    // passes the money-relevance gate, so personal messages and shopping alerts
+    // never enter the financial vault.
+    val relevanceGatedAllowlist = setOf(
+        "com.whatsapp",                    // WhatsApp (Pay)
+        "com.dreamplug.androidapp",        // CRED
+        "com.csam.icici.bank.imobile",     // ICICI iMobile
+        "in.amazon.mShop.android.shopping" // Amazon (Amazon Pay)
+    )
+
+    // SMS filters for common Indian bank identifiers (debits and credits)
+    private val smsKeywords = setOf(
+        "debited", "spent", "sent", "transaction", "paid",
+        "credited", "received", "withdrawn"
+    )
 
     /**
      * Analyzes the TRAI-compliant SMS header for classification.
@@ -32,9 +60,23 @@ object AlertFilter {
     }
 
     fun extractNotificationText(packageName: String, extras: Bundle?): String? {
-        if (!notificationAllowlist.contains(packageName)) return null
-        val text = extras?.getCharSequence("android.text")?.toString() ?: return null
+        val isPurePayment = notificationAllowlist.contains(packageName)
+        val isGated = smsAppAllowlist.contains(packageName) ||
+            relevanceGatedAllowlist.contains(packageName)
+        if (!isPurePayment && !isGated) return null
+
+        // Long alerts truncate in android.text; android.bigText carries the full body
+        val text = extras?.getCharSequence("android.bigText")?.toString()
+            ?: extras?.getCharSequence("android.text")?.toString()
+            ?: return null
         if (text.length < 5) return null
+
+        // Messaging/shopping/bank apps notify for non-financial events too;
+        // keep only money-related notifications out of the vault.
+        if (isGated) {
+            val sender = extras?.getCharSequence("android.title")?.toString()
+            if (!isRelevantSms(sender, text)) return null
+        }
         return text
     }
 

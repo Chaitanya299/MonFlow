@@ -109,7 +109,30 @@ describe('AlertHandshake — runHandshake', () => {
 
     expect(console.log).toHaveBeenCalledTimes(1);
     expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Parsed transaction: 10000 INR'));
+    // Two saves: the parsed transaction + the unparseable alert kept as raw untagged
+    expect(mockBridge.saveTransaction).toHaveBeenCalledTimes(2);
     expect(mockBridge.clearProcessedAlerts).toHaveBeenCalledWith([1, 2, 3]);
+  });
+
+  it('should save unparseable non-promotional alerts as raw untagged entries', async () => {
+    const rawText = 'Your relationship manager for account XX99 has changed';
+    mockBridge.getPendingAlerts.mockResolvedValue([
+      { id: 7, rawText, packageName: 'sms:VM-HDFCBK-S', timestamp: 1234 },
+    ]);
+    mockBridge.clearProcessedAlerts.mockResolvedValue(undefined);
+
+    await runHandshake();
+
+    expect(mockBridge.saveTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        category: 'untagged',
+        amountPaise: 0,
+        rawText,
+        tags: ['unparsed'],
+        sourcePackage: 'sms:VM-HDFCBK-S',
+      })
+    );
+    expect(mockBridge.clearProcessedAlerts).toHaveBeenCalledWith([7]);
   });
 });
 

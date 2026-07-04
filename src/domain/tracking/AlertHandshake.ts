@@ -31,8 +31,19 @@ export const runHandshake = async () => {
     const processedIds: number[] = [];
 
     for (const alert of alerts) {
-      if (!UniversalParser.isPromotional(alert.rawText, alert.packageName)) {
-        const tx = UniversalParser.parse(alert.rawText, alert.packageName);
+      let tx: ReturnType<typeof UniversalParser.parse> = null;
+      let promotional = false;
+      try {
+        promotional = UniversalParser.isPromotional(alert.rawText, alert.packageName);
+        if (!promotional) {
+          tx = UniversalParser.parse(alert.rawText, alert.packageName);
+        }
+      } catch (e) {
+        // One malformed alert must not stall the whole inbox;
+        // fall through so the raw text is preserved below
+      }
+
+      if (!promotional) {
         if (tx) {
           const detector = MerchantDetector.getInstance();
           const merchantName = tx.events[0]?.merchantName || null;
@@ -55,6 +66,24 @@ export const runHandshake = async () => {
 
           await repository.save(processedTx);
           console.log(`Parsed transaction: ${tx.amountPaise} ${tx.currency} → ${category} (${merchantName})`);
+        } else {
+          // Parser miss: keep the raw alert visible in the Untagged Bucket
+          // instead of silently deleting it. amountPaise 0 marks "needs manual entry".
+          const fallbackTx: ProcessedTransaction = {
+            id: `raw_${Date.now()}_${alert.id}`,
+            amountPaise: 0,
+            currency: 'INR',
+            trustLevel: 'UNKNOWN',
+            merchantName: null,
+            category: 'untagged',
+            tags: ['unparsed'],
+            sourcePackage: alert.packageName,
+            rawText: alert.rawText,
+            timestamp: alert.timestamp,
+            isSplit: false,
+            splitGroupId: null
+          };
+          await repository.save(fallbackTx);
         }
       }
       processedIds.push(alert.id);

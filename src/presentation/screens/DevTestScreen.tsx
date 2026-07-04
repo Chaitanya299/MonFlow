@@ -16,9 +16,11 @@ const isHermes = typeof (global as Record<string, unknown>).HermesInternal !== '
 
 interface Props {
   onBack: () => void;
+  onOpenLiveMonitor?: () => void;
+  onOpenSimulator?: () => void;
 }
 
-export const DevTestScreen: React.FC<Props> = ({ onBack }) => {
+export const DevTestScreen: React.FC<Props> = ({ onBack, onOpenLiveMonitor, onOpenSimulator }) => {
   const [results, setResults] = useState<TestResult[]>([]);
   const [running, setRunning] = useState(false);
   const [startMs, setStartMs] = useState(0);
@@ -77,16 +79,30 @@ export const DevTestScreen: React.FC<Props> = ({ onBack }) => {
         </Text>
       </View>
 
-      {/* Run button */}
-      <TouchableOpacity
-        style={[styles.runButton, running && styles.runButtonDisabled]}
-        onPress={runTests}
-        disabled={running}
-      >
-        <Text style={styles.runButtonText}>
-          {running ? 'Running…' : results.length > 0 ? 'Run Again' : 'Run Tests'}
-        </Text>
-      </TouchableOpacity>
+      {/* Action buttons */}
+      <View style={styles.actionRow}>
+        <TouchableOpacity
+          style={[styles.runButton, running && styles.runButtonDisabled]}
+          onPress={runTests}
+          disabled={running}
+        >
+          <Text style={styles.runButtonText}>
+            {running ? 'Running…' : results.length > 0 ? 'Run Again' : 'Run Tests'}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.monitorButton}
+          onPress={onOpenLiveMonitor}
+        >
+          <Text style={styles.monitorButtonText}>Live Monitor →</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.monitorButton}
+          onPress={onOpenSimulator}
+        >
+          <Text style={styles.monitorButtonText}>Simulator →</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Results list */}
       <ScrollView style={styles.results} contentContainerStyle={styles.resultsList}>
@@ -193,9 +209,12 @@ const styles = StyleSheet.create({
     width: 48,
     textAlign: 'right',
   },
-  runButton: {
+  actionRow: {
     marginHorizontal: 16,
     marginBottom: 12,
+    gap: 8,
+  },
+  runButton: {
     backgroundColor: '#3b82f6',
     paddingVertical: 12,
     borderRadius: 10,
@@ -209,6 +228,19 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 15,
     fontWeight: '700',
+  },
+  monitorButton: {
+    backgroundColor: '#1a1a1a',
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#2d2d2d',
+  },
+  monitorButtonText: {
+    color: '#9ca3af',
+    fontSize: 13,
+    fontWeight: '600',
   },
   results: {
     flex: 1,

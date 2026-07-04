@@ -2,6 +2,7 @@ import { NativeModules } from 'react-native';
 import { UniversalParser } from './UniversalParser';
 import { NativeAccountingRepository } from '../accounting/NativeAccountingRepository';
 import { ProcessedTransaction } from '../accounting/types';
+import { categorize } from '../accounting/TransactionCategorizer';
 
 const { MonfloBridge } = NativeModules;
 const repository = new NativeAccountingRepository();
@@ -33,13 +34,14 @@ export const runHandshake = async () => {
       if (!UniversalParser.isPromotional(alert.rawText, alert.packageName)) {
         const tx = UniversalParser.parse(alert.rawText, alert.packageName);
         if (tx) {
+          const merchantName = tx.events[0]?.merchantName ?? null;
           const processedTx: ProcessedTransaction = {
             id: `tx_${Date.now()}_${alert.id}`,
             amountPaise: tx.amountPaise,
             currency: tx.currency,
             trustLevel: tx.trustLevel,
-            merchantName: null, // To be refined by merchant detector in future
-            category: 'untagged',
+            merchantName,
+            category: categorize(merchantName, alert.rawText),
             tags: [],
             sourcePackage: alert.packageName,
             rawText: alert.rawText,

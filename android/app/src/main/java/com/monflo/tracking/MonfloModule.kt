@@ -2,6 +2,8 @@ package com.monflo.tracking
 
 import android.content.Context
 import android.content.Intent
+import android.provider.Settings
+import androidx.core.app.NotificationManagerCompat
 import com.facebook.react.bridge.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -78,11 +80,12 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
         val prefs = reactApplicationContext.getSharedPreferences("monflo_tracking_prefs", Context.MODE_PRIVATE)
         prefs.edit().putBoolean("isTrackingEnabled", enabled).apply()
 
-        val intent = Intent(reactApplicationContext, MonfloNotificationService::class.java)
         if (enabled) {
-            reactApplicationContext.startForegroundService(intent)
+            CaptureWatchdog.ensureServiceRunning(reactApplicationContext)
+            CaptureWatchdog.schedule(reactApplicationContext)
         } else {
-            reactApplicationContext.stopService(intent)
+            reactApplicationContext.stopService(Intent(reactApplicationContext, MonfloNotificationService::class.java))
+            CaptureWatchdog.cancel(reactApplicationContext)
         }
         promise.resolve(enabled)
     }
@@ -91,6 +94,57 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     fun isTrackingEnabled(promise: Promise) {
         val prefs = reactApplicationContext.getSharedPreferences("monflo_tracking_prefs", Context.MODE_PRIVATE)
         promise.resolve(prefs.getBoolean("isTrackingEnabled", false))
+    }
+
+    // === Capture Health Methods ===
+
+    @ReactMethod
+    fun isNotificationAccessGranted(promise: Promise) {
+        val enabled = NotificationManagerCompat.getEnabledListenerPackages(reactApplicationContext)
+        promise.resolve(enabled.contains(reactApplicationContext.packageName))
+    }
+
+    @ReactMethod
+    fun openNotificationAccessSettings() {
+        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        reactApplicationContext.startActivity(intent)
+    }
+
+    @ReactMethod
+    fun getCaptureHealth(promise: Promise) {
+        try {
+            val ctx = reactApplicationContext
+            val enabled = NotificationManagerCompat.getEnabledListenerPackages(ctx)
+            val result = Arguments.createMap()
+            result.putDouble("lastAliveMs", CaptureHealth.lastAliveMs(ctx).toDouble())
+            result.putDouble("lastListenerConnectedMs", CaptureHealth.lastListenerConnectedMs(ctx).toDouble())
+            result.putBoolean("accessGranted", enabled.contains(ctx.packageName))
+
+            val gapsArray = Arguments.createArray()
+            for (g in CaptureHealth.getGaps(ctx)) {
+                val map = Arguments.createMap()
+                map.putDouble("startMs", g.startMs.toDouble())
+                map.putDouble("endMs", g.endMs.toDouble())
+                map.putString("reason", g.reason)
+                map.putBoolean("acknowledged", g.acknowledged)
+                gapsArray.pushMap(map)
+            }
+            result.putArray("gaps", gapsArray)
+            promise.resolve(result)
+        } catch (e: Exception) {
+            promise.reject("HEALTH_ERROR", e.message)
+        }
+    }
+
+    @ReactMethod
+    fun acknowledgeCaptureGaps(promise: Promise) {
+        try {
+            CaptureHealth.acknowledgeAll(reactApplicationContext)
+            promise.resolve(true)
+        } catch (e: Exception) {
+            promise.reject("HEALTH_ERROR", e.message)
+        }
     }
 
     @ReactMethod

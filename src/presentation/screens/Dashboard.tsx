@@ -12,6 +12,13 @@ import { NativeAccountingRepository } from '../../domain/accounting/NativeAccoun
 import { ProcessedTransaction, DailySummary } from '../../domain/accounting/types';
 import { TransactionItem } from '../components/TransactionItem';
 import { runHandshake } from '../../domain/tracking/AlertHandshake';
+import {
+  getCaptureHealth,
+  formatGapMessage,
+  needsAccessFix,
+  acknowledgeCaptureGaps,
+  openNotificationAccessSettings,
+} from '../../domain/tracking/CaptureHealth';
 
 const repository = new NativeAccountingRepository();
 
@@ -25,11 +32,20 @@ export const Dashboard: React.FC<Props> = ({ onOpenUntagged }) => {
   const [untaggedCount, setUntaggedCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [captureWarning, setCaptureWarning] = useState<string | null>(null);
+  const [captureNeedsFix, setCaptureNeedsFix] = useState(false);
 
   const fetchData = async () => {
     try {
       // Trigger handshake to get latest notifications before listing
       await runHandshake();
+
+      // Surface any capture gaps the watchdog recorded while the app was closed.
+      const health = await getCaptureHealth();
+      if (health) {
+        setCaptureWarning(formatGapMessage(health.gaps));
+        setCaptureNeedsFix(needsAccessFix(health.gaps));
+      }
 
       const now = new Date();
       const todayStr = now.toISOString().split('T')[0];
@@ -60,6 +76,13 @@ export const Dashboard: React.FC<Props> = ({ onOpenUntagged }) => {
     fetchData();
   };
 
+  const onResolveCapture = async () => {
+    if (captureNeedsFix) openNotificationAccessSettings();
+    await acknowledgeCaptureGaps();
+    setCaptureWarning(null);
+    setCaptureNeedsFix(false);
+  };
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -74,6 +97,13 @@ export const Dashboard: React.FC<Props> = ({ onOpenUntagged }) => {
         <Text style={styles.greeting}>Hello,</Text>
         <Text style={styles.title}>Your Vault</Text>
       </View>
+
+      {captureWarning && (
+        <TouchableOpacity style={styles.captureBanner} onPress={onResolveCapture}>
+          <Text style={styles.captureText}>{captureWarning}</Text>
+          <Text style={styles.captureAction}>{captureNeedsFix ? 'FIX →' : 'GOT IT'}</Text>
+        </TouchableOpacity>
+      )}
 
       <View style={styles.summaryCard}>
         <Text style={styles.summaryLabel}>TODAY'S SPENDING</Text>
@@ -193,6 +223,30 @@ const styles = StyleSheet.create({
   alertAction: {
     fontSize: 12,
     color: '#ef6c00',
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  captureBanner: {
+    backgroundColor: '#fdecea',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#f5c6cb',
+  },
+  captureText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#b71c1c',
+    fontWeight: '600',
+    marginRight: 12,
+  },
+  captureAction: {
+    fontSize: 12,
+    color: '#b71c1c',
     fontWeight: '800',
     letterSpacing: 1,
   },

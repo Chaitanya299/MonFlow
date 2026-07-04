@@ -188,6 +188,19 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
         }
     }
 
+    @ReactMethod
+    fun deleteTransaction(txId: String, promise: Promise) {
+        scope.launch {
+            try {
+                val database = NativeDatabase.getInstance(reactApplicationContext)
+                database.processedTransactionDao().delete(txId)
+                promise.resolve(true)
+            } catch (e: Exception) {
+                promise.reject("DB_ERROR", e.message)
+            }
+        }
+    }
+
     // === Rule Methods ===
 
     @ReactMethod

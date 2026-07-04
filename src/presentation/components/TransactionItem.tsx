@@ -1,18 +1,40 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { ProcessedTransaction } from '../../domain/accounting/types';
 
 interface Props {
   transaction: ProcessedTransaction;
+  onEdit?: (tx: ProcessedTransaction) => void;
+  onDelete?: (tx: ProcessedTransaction) => void;
 }
 
-export const TransactionItem: React.FC<Props> = ({ transaction }) => {
+export const TransactionItem: React.FC<Props> = ({ transaction, onEdit, onDelete }) => {
   const isExpense = transaction.amountPaise > 0;
   const displayAmount = (Math.abs(transaction.amountPaise) / 100).toFixed(2);
   const date = new Date(transaction.timestamp).toLocaleDateString();
+  const isManual = transaction.sourcePackage === 'cash' || transaction.sourcePackage === 'manual';
+
+  const onLongPress = () => {
+    if (!onEdit && !onDelete) return;
+    const buttons: any[] = [];
+    if (onEdit && isManual) buttons.push({ text: 'Edit', onPress: () => onEdit(transaction) });
+    if (onDelete) {
+      buttons.push({
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () =>
+          Alert.alert('Delete transaction?', 'This cannot be undone.', [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Delete', style: 'destructive', onPress: () => onDelete(transaction) },
+          ]),
+      });
+    }
+    buttons.push({ text: 'Cancel', style: 'cancel' });
+    Alert.alert(transaction.merchantName || 'Transaction', undefined, buttons);
+  };
 
   return (
-    <View style={styles.container}>
+    <TouchableOpacity style={styles.container} onLongPress={onLongPress} delayLongPress={300} activeOpacity={0.6}>
       <View style={styles.left}>
         <Text style={styles.merchant}>{transaction.merchantName || 'Unknown Merchant'}</Text>
         <Text style={styles.details}>{transaction.sourcePackage.split('.').pop()?.toUpperCase()} • {date}</Text>
@@ -23,7 +45,7 @@ export const TransactionItem: React.FC<Props> = ({ transaction }) => {
         </Text>
         <Text style={styles.category}>{transaction.category.toUpperCase()}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

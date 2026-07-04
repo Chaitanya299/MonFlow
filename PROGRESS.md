@@ -1,6 +1,6 @@
 # Monflo Project Progress Dashboard
 
-> **Version:** 1.0.0.0 (V1 Prototype) | **Last Updated:** 2026-06-24
+> **Version:** 1.0.0.0 (V1 Prototype) | **Last Updated:** 2026-07-04
 > **Status:** `V1_PROTOTYPE_COMPLETE` | **System Health:** 🟢 Optimal
 
 ---
@@ -19,6 +19,9 @@
 | **TRAI Compliance** | ✅ IMPLEMENTED | Header suffix analysis (DLT) | P0 |
 | **UPI & Wallet Alerts Capture** | ✅ TESTED | 11 package-specific unit tests | P0 |
 | **Monochrome UI (V1)** | ✅ IMPLEMENTED | Live dashboard + feed | P1 |
+| **Manual Transaction Entry** | ✅ TESTED | 5 unit tests (paise validation, sign, wallet math) | P1 |
+| **Hand Cash Wallet** | ✅ IMPLEMENTED | Running balance + today's cash spend on Dashboard | P1 |
+| **Edit / Delete Transaction** | ✅ IMPLEMENTED | Long-press → edit (manual/cash) or delete (any); `deleteTransaction` bridge | P1 |
 | **iOS Automation (Shortcut)** | ✅ TESTED | Receiver + production parser integration | P0 |
 | **Merchant Detector** | ✅ TESTED | Trie + fuzzy matching, 50+ merchants, 26 tests | P0 |
 | **Android SMS Bridge** | ✅ TESTED | POSTs to Mac receiver, offline retry queue | P0 |
@@ -40,6 +43,9 @@
 - [x] **iOS Shortcut Receiver:** Production parser integration (UniversalParser), SMS→Notes flow, durable raw logging, built-in dedup, "Txn" format support.
 - [x] **Merchant Detection:** Trie-based exact match + Levenshtein fuzzy match. 50+ Indian merchants, auto-categorization. <0.001ms per lookup (cached).
 - [x] **Android SMS Bridge:** POSTs SMS to Mac receiver. Offline retry queue (100 max), 3 retries per alert. Parity with iOS.
+- [x] **Manual Transaction Entry:** General "+" FAB adds an expense/income manually. Pure `ManualEntry.ts` money logic (paise validation at the boundary, signed amounts), reuses the existing `saveTransaction` bridge — no native schema change. 5 unit tests.
+- [x] **Hand Cash Wallet:** Dashboard card showing cash-on-hand (top-ups minus spends) + today's cash spend. "Add cash" logs a top-up or cash spend (`sourcePackage: 'cash'`).
+- [x] **Edit / Delete:** Long-press a transaction → Edit (manual/cash entries, replaces the row via `saveTransaction` + `onConflict=REPLACE`) or Delete (any entry, via new `deleteTransaction` bridge → existing DAO `delete`).
 
 ### 🟡 Improvement Needed / Tech Debt
 - None (All outstanding security and testing technical debt has been completely resolved!)
@@ -63,6 +69,8 @@
 
 | Date | Category | Decision | Impact |
 | :--- | :--- | :--- | :--- |
+| 2026-07-04 | **Accounting** | Manual entries + cash wallet reuse `ProcessedTransaction` + `saveTransaction` (discriminated by `sourcePackage: 'cash' \| 'manual'`). No native schema change. | High (Simplicity) |
+| 2026-07-04 | **Accounting** | Edit = re-save with same id (`onConflict=REPLACE`); no separate update bridge. Delete = new `deleteTransaction` bridge → existing DAO `delete`. | Medium (Correctness) |
 | 2026-06-24 | **Android** | Android SMS bridge POSTs to same Mac receiver as iOS. Offline retry queue handles connectivity gracefully. | High (Parity, Reliability) |
 | 2026-06-24 | **Accounting** | Merchant detection uses Trie + Levenshtein (not regex). Avoids backtracking; scales to 1000s merchants offline. | High (Performance, Reliability) |
 | 2026-06-24 | **iOS** | iOS Shortcut receiver uses UniversalParser (not throwaway regex); durable raw log before parsing. | High (Accuracy, Reliability) |

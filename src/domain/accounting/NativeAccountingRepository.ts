@@ -77,7 +77,7 @@ export class NativeAccountingRepository implements AccountingRepository {
   }
 
   async delete(id: string): Promise<void> {
-    // Placeholder - would need bridge method deleteTransaction(id)
-    console.warn(`Delete transaction ${id} called - bridge method not yet implemented`);
+    if (!MonfloBridge) throw new Error('MonfloBridge not available');
+    await MonfloBridge.deleteTransaction(id);
   }
 }

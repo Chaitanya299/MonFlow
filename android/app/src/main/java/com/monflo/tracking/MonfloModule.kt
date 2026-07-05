@@ -82,13 +82,12 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
         val prefs = reactApplicationContext.getSharedPreferences("monflo_tracking_prefs", Context.MODE_PRIVATE)
         prefs.edit().putBoolean("isTrackingEnabled", enabled).apply()
 
-        val intent = Intent(reactApplicationContext, MonfloNotificationService::class.java)
         if (enabled) {
-            reactApplicationContext.startForegroundService(intent)
-            CaptureWatchdogWorker.schedulePeriodic(reactApplicationContext)
+            CaptureWatchdog.ensureServiceRunning(reactApplicationContext)
+            CaptureWatchdog.schedule(reactApplicationContext)
         } else {
-            reactApplicationContext.stopService(intent)
-            CaptureWatchdogWorker.cancelPeriodic(reactApplicationContext)
+            reactApplicationContext.stopService(Intent(reactApplicationContext, MonfloNotificationService::class.java))
+            CaptureWatchdog.cancel(reactApplicationContext)
         }
         promise.resolve(enabled)
     }
@@ -97,6 +96,57 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     fun isTrackingEnabled(promise: Promise) {
         val prefs = reactApplicationContext.getSharedPreferences("monflo_tracking_prefs", Context.MODE_PRIVATE)
         promise.resolve(prefs.getBoolean("isTrackingEnabled", false))
+    }
+
+    // === Capture Health Methods ===
+
+    @ReactMethod
+    fun isNotificationAccessGranted(promise: Promise) {
+        val enabled = NotificationManagerCompat.getEnabledListenerPackages(reactApplicationContext)
+        promise.resolve(enabled.contains(reactApplicationContext.packageName))
+    }
+
+    @ReactMethod
+    fun openNotificationAccessSettings() {
+        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        reactApplicationContext.startActivity(intent)
+    }
+
+    @ReactMethod
+    fun getCaptureHealth(promise: Promise) {
+        try {
+            val ctx = reactApplicationContext
+            val enabled = NotificationManagerCompat.getEnabledListenerPackages(ctx)
+            val result = Arguments.createMap()
+            result.putDouble("lastAliveMs", CaptureHealth.lastAliveMs(ctx).toDouble())
+            result.putDouble("lastListenerConnectedMs", CaptureHealth.lastListenerConnectedMs(ctx).toDouble())
+            result.putBoolean("accessGranted", enabled.contains(ctx.packageName))
+
+            val gapsArray = Arguments.createArray()
+            for (g in CaptureHealth.getGaps(ctx)) {
+                val map = Arguments.createMap()
+                map.putDouble("startMs", g.startMs.toDouble())
+                map.putDouble("endMs", g.endMs.toDouble())
+                map.putString("reason", g.reason)
+                map.putBoolean("acknowledged", g.acknowledged)
+                gapsArray.pushMap(map)
+            }
+            result.putArray("gaps", gapsArray)
+            promise.resolve(result)
+        } catch (e: Exception) {
+            promise.reject("HEALTH_ERROR", e.message)
+        }
+    }
+
+    @ReactMethod
+    fun acknowledgeCaptureGaps(promise: Promise) {
+        try {
+            CaptureHealth.acknowledgeAll(reactApplicationContext)
+            promise.resolve(true)
+        } catch (e: Exception) {
+            promise.reject("HEALTH_ERROR", e.message)
+        }
     }
 
     @ReactMethod
@@ -338,17 +388,6 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     }
 
     // === Capture Reliability Methods ===
-
-    @ReactMethod
-    fun getCaptureHealth(promise: Promise) {
-        val ctx = reactApplicationContext
-        val result = Arguments.createMap()
-        result.putDouble("lastHeartbeatMs", Heartbeat.lastHeartbeatMs(ctx).toDouble())
-        result.putDouble("lastWatchdogRunMs", Heartbeat.lastWatchdogRunMs(ctx).toDouble())
-        result.putDouble("nowMs", System.currentTimeMillis().toDouble())
-        result.putDouble("staleThresholdMs", Heartbeat.STALE_THRESHOLD_MS.toDouble())
-        promise.resolve(result)
-    }
 
     @ReactMethod
     fun isIgnoringBatteryOptimizations(promise: Promise) {

@@ -7,14 +7,19 @@ import {
   ActivityIndicator,
   RefreshControl,
   TouchableOpacity,
-  NativeModules,
 } from 'react-native';
 import { NativeAccountingRepository } from '../../domain/accounting/NativeAccountingRepository';
 import { ProcessedTransaction, DailySummary } from '../../domain/accounting/types';
 import { TransactionItem } from '../components/TransactionItem';
 import { runHandshake } from '../../domain/tracking/AlertHandshake';
+import {
+  getCaptureHealth,
+  formatGapMessage,
+  needsAccessFix,
+  acknowledgeCaptureGaps,
+  openNotificationAccessSettings,
+} from '../../domain/tracking/CaptureHealth';
 
-const { MonfloBridge } = NativeModules;
 const repository = new NativeAccountingRepository();
 
 interface Props {
@@ -41,33 +46,20 @@ export const Dashboard: React.FC<Props> = ({ onOpenUntagged, onOpenDevTest, onOp
   const [untaggedCount, setUntaggedCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [captureStale, setCaptureStale] = useState(false);
-
-  // Detects a silently-dead capture pipeline (OEM battery killer took out the
-  // notification listener process). Reuses this screen's own fetch/refresh
-  // cadence instead of adding a separate poll timer.
-  const checkCaptureHealth = async () => {
-    try {
-      const trackingEnabled = await (MonfloBridge?.isTrackingEnabled?.() ?? Promise.resolve(false));
-      if (!trackingEnabled) {
-        setCaptureStale(false);
-        return;
-      }
-      const health = await MonfloBridge?.getCaptureHealth?.();
-      if (!health || health.lastHeartbeatMs === 0) {
-        setCaptureStale(false); // never started yet — not a failure
-        return;
-      }
-      setCaptureStale(health.nowMs - health.lastHeartbeatMs > health.staleThresholdMs);
-    } catch {
-      setCaptureStale(false);
-    }
-  };
+  const [captureWarning, setCaptureWarning] = useState<string | null>(null);
+  const [captureNeedsFix, setCaptureNeedsFix] = useState(false);
 
   const fetchData = async () => {
     try {
       // Trigger handshake to get latest notifications before listing
       await runHandshake();
+
+      // Surface any capture gaps the watchdog recorded while the app was closed.
+      const health = await getCaptureHealth();
+      if (health) {
+        setCaptureWarning(formatGapMessage(health.gaps));
+        setCaptureNeedsFix(needsAccessFix(health.gaps));
+      }
 
       const now = new Date();
       const todayStr = now.toISOString().split('T')[0];
@@ -76,7 +68,6 @@ export const Dashboard: React.FC<Props> = ({ onOpenUntagged, onOpenDevTest, onOp
         repository.getByDateRange(now.getTime() - 7 * 24 * 60 * 60 * 1000, now.getTime() + 10000),
         repository.getDailySummary(todayStr),
         repository.getUntagged(),
-        checkCaptureHealth(),
       ]);
 
       setTransactions(txs);
@@ -99,6 +90,18 @@ export const Dashboard: React.FC<Props> = ({ onOpenUntagged, onOpenDevTest, onOp
     fetchData();
   };
 
+  const onResolveCapture = async () => {
+    if (captureNeedsFix) {
+      // Prefer the in-app setup flow (guides through all permissions); fall
+      // back to the direct system settings intent if it's not wired up.
+      if (onOpenPermissions) onOpenPermissions();
+      else openNotificationAccessSettings();
+    }
+    await acknowledgeCaptureGaps();
+    setCaptureWarning(null);
+    setCaptureNeedsFix(false);
+  };
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -116,6 +119,13 @@ export const Dashboard: React.FC<Props> = ({ onOpenUntagged, onOpenDevTest, onOp
         </TouchableOpacity>
       </View>
 
+      {captureWarning && (
+        <TouchableOpacity style={styles.captureBanner} onPress={onResolveCapture}>
+          <Text style={styles.captureText}>{captureWarning}</Text>
+          <Text style={styles.captureAction}>{captureNeedsFix ? 'FIX →' : 'GOT IT'}</Text>
+        </TouchableOpacity>
+      )}
+
       <View style={styles.summaryCard}>
         <Text style={styles.summaryLabel}>TODAY'S SPENDING</Text>
         <Text style={styles.summaryAmount}>
@@ -126,15 +136,6 @@ export const Dashboard: React.FC<Props> = ({ onOpenUntagged, onOpenDevTest, onOp
           <Text style={styles.summarySubtext}>100% Local</Text>
         </View>
       </View>
-
-      {captureStale && (
-        <TouchableOpacity style={styles.captureWarningBanner} onPress={onOpenPermissions}>
-          <Text style={styles.captureWarningText}>
-            Capture may be paused — tap to check permissions
-          </Text>
-          <Text style={styles.captureWarningAction}>FIX →</Text>
-        </TouchableOpacity>
-      )}
 
       {untaggedCount > 0 && (
         <TouchableOpacity style={styles.alertBanner} onPress={onOpenUntagged}>
@@ -246,25 +247,25 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 1,
   },
-  captureWarningBanner: {
-    backgroundColor: '#ffebee',
+  captureBanner: {
+    backgroundColor: '#fdecea',
     borderRadius: 12,
     padding: 16,
-    marginBottom: 16,
+    marginBottom: 24,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#ffcdd2',
+    borderColor: '#f5c6cb',
   },
-  captureWarningText: {
-    fontSize: 14,
-    color: '#c62828',
-    fontWeight: '600',
+  captureText: {
     flex: 1,
-    marginRight: 8,
+    fontSize: 14,
+    color: '#b71c1c',
+    fontWeight: '600',
+    marginRight: 12,
   },
-  captureWarningAction: {
+  captureAction: {
     fontSize: 12,
     color: '#b71c1c',
     fontWeight: '800',

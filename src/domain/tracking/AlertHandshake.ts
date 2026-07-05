@@ -1,8 +1,8 @@
 import { NativeModules } from 'react-native';
 import { UniversalParser } from './UniversalParser';
-import { MerchantDetector } from './MerchantDetector';
 import { NativeAccountingRepository } from '../accounting/NativeAccountingRepository';
 import { ProcessedTransaction } from '../accounting/types';
+import { categorize } from '../accounting/TransactionCategorizer';
 
 const { MonfloBridge } = NativeModules;
 const repository = new NativeAccountingRepository();
@@ -45,10 +45,8 @@ export const runHandshake = async () => {
 
       if (!promotional) {
         if (tx) {
-          const detector = MerchantDetector.getInstance();
-          const merchantName = tx.events[0]?.merchantName || null;
-          const category = detector.categorize(merchantName);
-
+          const merchantName = tx.events[0]?.merchantName ?? null;
+          const category = categorize(merchantName, alert.rawText);
           const processedTx: ProcessedTransaction = {
             id: `tx_${Date.now()}_${alert.id}`,
             amountPaise: tx.amountPaise,

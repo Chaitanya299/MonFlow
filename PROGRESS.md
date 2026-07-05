@@ -10,6 +10,7 @@
 | Component | Status | Verification | Priority |
 | :--- | :--- | :--- | :--- |
 | **Notification Capture** | ✅ TESTED | 46 unit tests + manual | P0 |
+| **Capture Reliability (Rebind + Watchdog)** | ✅ UNIT-TESTED | 7 unit tests; ⏳ pending on-device OEM matrix | P0 |
 | **SMS Fallback Engine** | ✅ TESTED | JUnit ready | P1 |
 | **Encrypted Vault (SQLCipher)** | ✅ TESTED | Manual key derivation check | P0 |
 | **Automerge Sync Engine** | ✅ TESTED | Contract tests passed | P0 |
@@ -27,6 +28,7 @@
 | **Notification Simulator** | 🟡 DEVICE VERIFY | 10 presets; real heads-up notif + DB inject | P1 |
 | **Capture Reliability (Watchdog)** | 🟡 DEVICE VERIFY | Listener rebind + WorkManager watchdog + battery exemption | P0 |
 | **E2EE Cloud Backup** | 📝 ALREADY PLANNED | Awaiting V2 implementation | P1 |
+| **Auto-Categorization** | ✅ TESTED | 15 unit tests (categorizer + handshake e2e) | P1 |
 | **Bluetooth Discovery** | 🧪 RESEARCH NEEDED | Investigating BLE power drain | P2 |
 
 ---
@@ -47,12 +49,14 @@
 - [x] **On-Device Test Runner:** Hermes-native minitest shim runs 66 domain tests on-device (5-tap gesture on "Your Vault" → DevTestScreen). Confirms parser behaves identically under Hermes vs Node/Vitest.
 - [x] **Live Monitor:** Dev screen polls `getPendingAlerts()` every 2s, shows raw SMS/notification text beside `UniversalParser` output in real time. Read-only — never clears alerts.
 - [x] **GPay Package Fix:** Corrected notification allowlist + simulator preset to `com.google.android.apps.nbu.paisa.user` (matches `GPAY_PACKAGE`); GPay alerts now pass the allowlist and route to the gpay_paid template.
-- [x] **Capture Reliability (Watchdog):** Closes the biggest silent-failure risk in the app — OEM battery killers (Xiaomi/Samsung/Oppo/Vivo) routinely kill `NotificationListenerService` processes with no OS-level restart, silently ending capture with no visible sign. Four layers: (1) `onListenerConnected`/`onListenerDisconnected` override with `requestRebind()` — recovers from system-initiated disconnects; (2) 5-min in-process heartbeat (`Heartbeat.kt`) touched on connect + every alert, so a stale timestamp means the process died, not "no alerts happened"; (3) `CaptureWatchdogWorker` (WorkManager, 15-min periodic + immediate one-shot from `onDestroy`/`onTaskRemoved`) restarts the foreground service if the heartbeat is stale beyond 20 min and notification access is still granted; (4) `requestIgnoreBatteryOptimizations` bridge method + new "Unrestricted Battery" row in `PermissionsSetupScreen` — the actual root-cause fix, since Doze/App Standby exemption stops most OEM kills before they happen. `Dashboard` surfaces a "Capture may be paused" banner (reusing the existing fetch/refresh cadence, no new poll timer) when `getCaptureHealth()` reports a stale gap, routing straight back to permissions setup.
+- [x] **Capture Reliability Engine:** Closes the biggest silent-failure risk in the app — OEM battery killers (Xiaomi/Samsung/Oppo/Vivo) routinely kill `NotificationListenerService` processes with no OS-level restart, silently ending capture with no visible sign. Layers: (1) `onListenerConnected`/`onListenerDisconnected` override with `requestRebind()`, plus a backfill of any alerts still on-screen via `activeNotifications` on reconnect; (2) `CaptureHealth` (SharedPreferences-backed) distinguishes a background-suppression gap from an access-revoked gap, keeping a capped history of both; (3) `CaptureWatchdog`/`CaptureWatchdogWorker` (WorkManager, 15-min periodic + immediate kick from `onDestroy`/`onTaskRemoved`) re-arms the foreground service; (4) `requestIgnoreBatteryOptimizations` bridge method + "Unrestricted Battery" row in `PermissionsSetupScreen` — the actual root-cause fix, since Doze/App Standby exemption stops most OEM kills before they happen. `Dashboard` surfaces a gap-reason banner (reusing the existing fetch/refresh cadence) that routes to permissions setup or acknowledges the gap.
+- [x] **Auto-Categorization Engine:** On-device keyword categorizer (`TransactionCategorizer.ts`) maps each parsed transaction into the existing 7-category taxonomy (groceries→food, travel→transport) from merchant name **and** raw alert text. Wired into the handshake; unmatched merchants stay `untagged` for the Untagged Bucket rather than guessing.
 
 ### 🟡 Improvement Needed / Tech Debt
 - [ ] **Notification Simulator — device verify:** Built (10 presets: 5 UPI apps + 5 bank SMS). Tap row → inline parse (dedup cleared so re-parse works); 🔔 → real heads-up notification (HIGH-importance channel + POST_NOTIFICATIONS) + DB inject for accurate per-app parse in Live Monitor. Requires APK rebuild; pending on-device confirmation.
-- [ ] **Capture Reliability — device verify:** Rebind/watchdog/battery-exemption logic compiles clean but is untested on real OEM hardware (the actual failure mode it targets). Needs multi-hour/overnight soak tests on at least one Xiaomi/Oppo/Vivo device with the app backgrounded, plus manual "swipe from recents" and "force-stop then wait" checks. No Robolectric/instrumented test added — Context-dependent SharedPreferences/WorkManager logic isn't unit-testable without adding that dependency, which was out of scope for this change.
+- [ ] **Capture Reliability — device verify:** Pure gap-computation logic is unit-tested (`CaptureHealthTest.kt`), but the WorkManager/background-execution path is untested on real OEM hardware (the actual failure mode it targets). Needs multi-hour/overnight soak tests on at least one Xiaomi/Oppo/Vivo device with the app backgrounded, plus manual "swipe from recents" and "force-stop then wait" checks.
 - [ ] **SuperMoney + Navi parser templates:** No package-specific templates yet (only GPay/PhonePe/Paytm). Both fall to FSM fallback — fire those presets in the simulator and add templates based on actual output.
+- [ ] **OEM autostart/battery UX (Phase 4):** Per-manufacturer autostart deep-links + battery-optimization opt-out flow. Designed, deferred — needs physical-device validation (see Manual OEM Validation Matrix below).
 
 ### 🟡 Release-Blocking Issues (Pre-Launch Fixes)
 - ✅ **RESOLVED (2026-07-02):** Native notification allowlist had **wrong package IDs** (GPay missing `.user` suffix, Paytm listed as `com.paytm.app` instead of `net.one97.paytm`) — only PhonePe was capturable on a real device. Fixed in [AlertFilter.kt](android/app/src/main/java/com/monflo/tracking/AlertFilter.kt); Kotlin tests updated to the real IDs plus a regression test rejecting the stale GPay ID. **Still pending: real-device smoke test (₹1 through each app).**
@@ -98,8 +102,9 @@
 | 2026-07-02 | **Tracking** | 3-tier notification allowlist: pure-payment apps (GPay/PhonePe/Paytm/BHIM/super.money/Navi) captured raw; SMS apps + mixed apps (WhatsApp/CRED/iMobile/Amazon) captured only through the money-relevance gate so chats/orders/promos never enter the vault. All package IDs Play-Store-verified. | High (Coverage, Privacy) |
 | 2026-07-02 | **Tracking** | Capture bank SMS via SMS-app notifications (Google/Samsung Messages allowlist) instead of SMS permissions — the Play-compliant universal fallback. Routed as `sms:<sender>` so TRAI trust analysis applies. | High (Play Compliance, Coverage) |
 | 2026-07-02 | **Tracking** | Corrected GPay/Paytm package IDs in native allowlist; listener auto-rebind for OEM battery kills; bigText extraction for long alerts. | High (Capture Reliability) |
+| 2026-06-28 | **Accounting** | Auto-categorize transactions via on-device keyword rules into the existing 7-category taxonomy (reuse, no data-model change; groceries→food, travel→transport). Unmatched stays `untagged` rather than guessing. | High (UX) |
+| 2026-06-28 | **Reliability** | Engine-first capture reliability: rebind + onTaskRemoved/onDestroy kick + boot expansion + WorkManager 15-min watchdog + gap detection (`CaptureHealth`, replaces an earlier simpler heartbeat prototype). Gap alerting via in-app banner. OEM autostart/battery UX deferred to Phase 4. | Critical (Data Integrity) |
 | 2026-06-28 | **Android** | WorkManager (not raw AlarmManager) drives the capture watchdog — periodic minimum is 15 min either way, but WorkManager survives Doze/App Standby transitions and process death more reliably, and needs no manual manifest wiring beyond the dependency. | High (Reliability) |
-| 2026-06-28 | **Android** | Watchdog restarts the service unconditionally when the heartbeat is stale + listener permission is still granted, rather than trying to detect "is the service already running" first — `startForegroundService` on an already-alive service is a safe no-op, so the extra check would add complexity for no benefit. | Medium (Simplicity) |
 | 2026-06-27 | **Tracking** | Notification Simulator: 🔔 posts a real heads-up notification AND injects to DB with the correct package. Android won't let an app post "as" PhonePe (pkg is always com.monflo), so per-app routing is tested via the inject path, not the live notification. | Medium (Testability) |
 | 2026-06-27 | **Tracking** | Clear `Deduplicator` before each inline simulator parse. Parser dedupes any sourcePackage≠'app' within a 5-min window, so re-parsing the same preset returned null (false "PARSE FAILED"). | Medium (DevEx) |
 | 2026-06-27 | **Android** | Fix GPay package to `com.google.android.apps.nbu.paisa.user` in AlertFilter allowlist + simulator preset (was missing `.user`, so GPay alerts were dropped at the allowlist and never reached the gpay template). | High (Accuracy) |
@@ -116,7 +121,26 @@
 
 ---
 
-## 4. Quality Metrics
+## 4. Manual OEM Validation Matrix (Capture Reliability)
+
+Unit tests cover the pure gap/heartbeat logic; "did the OEM kill us overnight" can only be
+verified on physical hardware. Run each device for hours/overnight with tracking on.
+
+| Check | How to verify | Xiaomi/Redmi/POCO | Samsung | Oppo/Realme | Vivo | OnePlus | Pixel |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| FGS + watchdog scheduled on enable | `adb shell dumpsys jobscheduler \| grep monflo` | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| Listener rebinds after disconnect | toggle notification access off→on, confirm `onListenerConnected` heartbeat | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| Survives app swipe from recents | swipe app, send test UPI alert, confirm captured | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| Survives `am force-stop` | `adb shell am force-stop com.monflo`, wait a tick, send alert | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| Recovers after overnight battery kill | leave overnight, confirm capture resumes + gap recorded if down | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| Access-revoked → banner + system notification | revoke notification access, wait a tick | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| Re-arms after reboot | reboot device, confirm FGS + watchdog return | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+
+> Phase 4 (per-OEM autostart + battery-whitelist onboarding) targets the rows that fail here.
+
+---
+
+## 5. Quality Metrics
 - **JS Coverage:** 100% (Domain & Tracking logic)
 - **Replay Accuracy:** 100% (Verified against 33 real-life SMS samples)
 - **Security Grade:** A- (Pending dependency updates)

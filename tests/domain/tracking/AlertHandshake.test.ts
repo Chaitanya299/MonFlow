@@ -19,6 +19,8 @@ const mockBridge = NativeModules.MonfloBridge as {
   saveTransaction: ReturnType<typeof vi.fn>;
 };
 
+const GPAY = 'com.google.android.apps.nbu.paisa.user';
+
 describe('AlertHandshake — runHandshake', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -133,6 +135,52 @@ describe('AlertHandshake — runHandshake', () => {
       })
     );
     expect(mockBridge.clearProcessedAlerts).toHaveBeenCalledWith([7]);
+  });
+});
+
+describe('AlertHandshake — auto-categorization (end to end)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockBridge.clearProcessedAlerts.mockResolvedValue(undefined);
+    mockBridge.saveTransaction.mockResolvedValue(undefined);
+  });
+
+  it('extracts the merchant and auto-categorizes a food payment', async () => {
+    mockBridge.getPendingAlerts.mockResolvedValue([
+      { id: 1, rawText: 'You paid ₹500 to Zomato', packageName: GPAY, timestamp: 1000 },
+    ]);
+
+    await runHandshake();
+
+    expect(mockBridge.saveTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({ merchantName: 'Zomato', category: 'food', amountPaise: 50000 })
+    );
+  });
+
+  it('folds a travel merchant into transport', async () => {
+    mockBridge.getPendingAlerts.mockResolvedValue([
+      { id: 2, rawText: 'You paid ₹1200 to MakeMyTrip', packageName: GPAY, timestamp: 2000 },
+    ]);
+
+    await runHandshake();
+
+    expect(mockBridge.saveTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({ merchantName: 'MakeMyTrip', category: 'transport' })
+    );
+  });
+
+  it('leaves an unknown merchant untagged for manual reconciliation', async () => {
+    mockBridge.getPendingAlerts.mockResolvedValue([
+      { id: 3, rawText: 'You paid ₹100 to Rahul Kumar', packageName: GPAY, timestamp: 3000 },
+    ]);
+
+    await runHandshake();
+
+    expect(mockBridge.saveTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({ merchantName: 'Rahul Kumar', category: 'untagged' })
+    );
   });
 });
 

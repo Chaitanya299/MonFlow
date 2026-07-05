@@ -24,7 +24,16 @@ class VaultManager(private val context: Context) {
             .apply()
     }
 
+    fun isInitialized(): Boolean = prefs.contains("enc_entropy")
+
     fun getDatabasePassphrase(): ByteArray {
+        // Self-heal: if the vault was never initialized (e.g. a background
+        // NotificationService/SmsReceiver opens the DB before the app's first
+        // launch), generate entropy now. Without this the stored IV is empty and
+        // KeystoreHelper.decrypt throws "unsupported IV length: 0 bytes".
+        if (!isInitialized()) {
+            initializeNewVault()
+        }
         val encEntropy = Base64.decode(prefs.getString("enc_entropy", ""), Base64.DEFAULT)
         val iv = Base64.decode(prefs.getString("enc_iv", ""), Base64.DEFAULT)
         val entropy = KeystoreHelper.decrypt(encEntropy, iv)

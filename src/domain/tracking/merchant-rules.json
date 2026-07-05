@@ -1,57 +1,67 @@
 {
   "rules": [
     {
+      "exactPatterns": ["swiggy", "zomato", "uber eats", "eatsure", "faasos", "behrouz", "box8", "freshmenu"],
+      "category": "food",
+      "priority": 10
+    },
+    {
+      "exactPatterns": ["kfc", "mcd", "mcdonalds", "dominos", "pizza hut", "burger king", "subway", "wow momo", "haldiram", "barbeque nation"],
+      "category": "food",
+      "priority": 10
+    },
+    {
+      "exactPatterns": ["starbucks", "cafe coffee day", "ccd", "chaayos", "third wave coffee", "blue tokai"],
+      "category": "food",
+      "priority": 10
+    },
+    {
+      "exactPatterns": ["blinkit", "zepto", "instamart", "swiggy instamart", "bigbasket", "big basket", "grofers", "dunzo", "jiomart", "jio mart", "milkbasket", "country delight"],
+      "category": "food",
+      "priority": 10
+    },
+    {
       "exactPatterns": ["amazon pay", "amazon shopping", "amzn", "amazon.in"],
       "category": "shopping",
       "priority": 10
     },
     {
-      "exactPatterns": ["flipkart", "flipkart pay"],
+      "exactPatterns": ["flipkart", "flipkart pay", "myntra", "ajio", "meesho", "snapdeal", "tata cliq", "tatacliq"],
       "category": "shopping",
       "priority": 10
     },
     {
-      "exactPatterns": ["myntra"],
+      "exactPatterns": ["nykaa", "lenskart", "boat", "croma", "reliance digital", "vijay sales"],
       "category": "shopping",
       "priority": 10
     },
     {
-      "exactPatterns": ["ajio"],
+      "exactPatterns": ["zudio", "pantaloons", "lifestyle", "shoppers stop", "decathlon", "ikea"],
       "category": "shopping",
       "priority": 10
     },
     {
-      "exactPatterns": ["unacademy", "byjus", "vedantu"],
-      "category": "entertainment",
-      "priority": 9
-    },
-    {
-      "exactPatterns": ["swiggy", "zomato", "uber eats"],
-      "category": "food",
-      "priority": 10
-    },
-    {
-      "exactPatterns": ["starbucks", "mcd", "mcdonalds", "dominos", "pizza hut"],
-      "category": "food",
-      "priority": 10
-    },
-    {
-      "exactPatterns": ["cafe coffee day", "ccd"],
-      "category": "food",
-      "priority": 10
-    },
-    {
-      "exactPatterns": ["bigbasket", "grofers", "blinkit"],
+      "exactPatterns": ["dmart", "reliance", "jio store", "more supermarket", "spencer"],
       "category": "shopping",
       "priority": 10
     },
     {
-      "exactPatterns": ["uber", "ola"],
+      "exactPatterns": ["uber", "ola", "rapido", "namma yatri", "indrive", "blablacar"],
       "category": "transport",
       "priority": 10
     },
     {
-      "exactPatterns": ["makemytrip", "cleartrip", "goibibo"],
+      "exactPatterns": ["indian oil", "iocl", "hpcl", "bharat petroleum", "bpcl", "nayara", "shell", "fastag"],
+      "category": "transport",
+      "priority": 10
+    },
+    {
+      "exactPatterns": ["irctc", "dmrc", "metro", "bmtc", "ksrtc"],
+      "category": "transport",
+      "priority": 9
+    },
+    {
+      "exactPatterns": ["makemytrip", "cleartrip", "goibibo", "ixigo", "redbus"],
       "category": "transport",
       "priority": 9
     },
@@ -61,59 +71,29 @@
       "priority": 9
     },
     {
-      "exactPatterns": ["netflix", "hotstar", "amazon prime", "prime video"],
+      "exactPatterns": ["netflix", "hotstar", "disney hotstar", "amazon prime", "prime video", "sonyliv", "zee5", "jiocinema"],
       "category": "entertainment",
       "priority": 10
     },
     {
-      "exactPatterns": ["spotify", "gaana", "jio saavn"],
+      "exactPatterns": ["spotify", "gaana", "jio saavn", "youtube premium", "apple music"],
       "category": "entertainment",
       "priority": 10
     },
     {
-      "exactPatterns": ["youtube premium"],
+      "exactPatterns": ["bookmyshow", "pvr", "inox", "cinema", "theatre"],
       "category": "entertainment",
       "priority": 10
     },
     {
-      "exactPatterns": ["apollo", "fortis", "max", "manipal"],
-      "category": "health",
+      "exactPatterns": ["steam", "playstation", "xbox", "nintendo"],
+      "category": "entertainment",
       "priority": 10
     },
     {
-      "exactPatterns": ["netmeds", "1mg"],
-      "category": "health",
-      "priority": 10
-    },
-    {
-      "exactPatterns": ["airtel", "jio", "vodafone", "idea"],
-      "category": "bills",
-      "priority": 10
-    },
-    {
-      "exactPatterns": ["electricity", "power board", "discoms"],
-      "category": "bills",
-      "priority": 10
-    },
-    {
-      "exactPatterns": ["water board", "water supply"],
-      "category": "bills",
-      "priority": 10
-    },
-    {
-      "exactPatterns": ["google", "microsoft", "adobe"],
-      "category": "shopping",
+      "exactPatterns": ["unacademy", "byjus", "vedantu", "ncert", "scholar"],
+      "category": "entertainment",
       "priority": 9
-    },
-    {
-      "exactPatterns": ["ixigo", "redbus"],
-      "category": "transport",
-      "priority": 9
-    },
-    {
-      "exactPatterns": ["bookmyshow"],
-      "category": "entertainment",
-      "priority": 10
     },
     {
       "exactPatterns": ["instagram", "meta"],
@@ -121,72 +101,52 @@
       "priority": 8
     },
     {
-      "exactPatterns": ["ncert", "scholar"],
-      "category": "entertainment",
-      "priority": 8
-    },
-    {
-      "exactPatterns": ["meesho"],
-      "category": "shopping",
-      "priority": 10
-    },
-    {
-      "exactPatterns": ["cashback", "rewards"],
-      "category": "transfer",
-      "priority": 5
-    },
-    {
-      "exactPatterns": ["refund", "reversal"],
-      "category": "transfer",
-      "priority": 5
-    },
-    {
-      "exactPatterns": ["gpay", "google pay"],
-      "category": "transfer",
-      "priority": 8
-    },
-    {
-      "exactPatterns": ["paytm", "phonepe"],
-      "category": "transfer",
-      "priority": 8
-    },
-    {
-      "exactPatterns": ["salary", "payroll"],
-      "category": "transfer",
-      "priority": 10
-    },
-    {
-      "exactPatterns": ["dmart"],
-      "category": "shopping",
-      "priority": 10
-    },
-    {
-      "exactPatterns": ["reliance", "jio store"],
-      "category": "shopping",
-      "priority": 10
-    },
-    {
-      "exactPatterns": ["ikea"],
-      "category": "shopping",
-      "priority": 10
-    },
-    {
-      "exactPatterns": ["decathlon"],
-      "category": "shopping",
-      "priority": 10
-    },
-    {
-      "exactPatterns": ["fitness", "gym", "cult"],
+      "exactPatterns": ["apollo", "fortis", "max", "manipal", "medplus", "wellness forever"],
       "category": "health",
       "priority": 10
     },
     {
-      "exactPatterns": ["doctor", "consultation"],
+      "exactPatterns": ["netmeds", "1mg", "tata 1mg", "pharmeasy", "practo"],
       "category": "health",
       "priority": 10
     },
     {
-      "exactPatterns": ["insurance"],
+      "exactPatterns": ["fitness", "gym", "cult", "cure fit", "curefit"],
+      "category": "health",
+      "priority": 10
+    },
+    {
+      "exactPatterns": ["doctor", "consultation", "hospital", "clinic", "diagnostic"],
+      "category": "health",
+      "priority": 9
+    },
+    {
+      "exactPatterns": ["haircut", "salon", "spa"],
+      "category": "health",
+      "priority": 9
+    },
+    {
+      "exactPatterns": ["airtel", "jio", "vodafone", "idea"],
+      "category": "bills",
+      "priority": 10
+    },
+    {
+      "exactPatterns": ["tata power", "adani electricity", "bescom", "torrent power", "electricity", "power board", "discoms"],
+      "category": "bills",
+      "priority": 10
+    },
+    {
+      "exactPatterns": ["act fibernet", "hathway", "water board", "water supply"],
+      "category": "bills",
+      "priority": 10
+    },
+    {
+      "exactPatterns": ["indane", "hp gas", "bharat gas"],
+      "category": "bills",
+      "priority": 10
+    },
+    {
+      "exactPatterns": ["insurance", "lic", "premium"],
       "category": "bills",
       "priority": 10
     },
@@ -201,24 +161,29 @@
       "priority": 10
     },
     {
-      "exactPatterns": ["haircut", "salon", "spa"],
-      "category": "health",
-      "priority": 9
+      "exactPatterns": ["google one", "icloud", "dropbox", "google", "microsoft", "adobe"],
+      "category": "bills",
+      "priority": 8
     },
     {
-      "exactPatterns": ["cinema", "theatre"],
-      "category": "entertainment",
+      "exactPatterns": ["cashback", "rewards"],
+      "category": "transfer",
+      "priority": 5
+    },
+    {
+      "exactPatterns": ["refund", "reversal"],
+      "category": "transfer",
+      "priority": 5
+    },
+    {
+      "exactPatterns": ["gpay", "google pay", "paytm", "phonepe", "cred", "bhim"],
+      "category": "transfer",
+      "priority": 8
+    },
+    {
+      "exactPatterns": ["salary", "payroll"],
+      "category": "transfer",
       "priority": 10
-    },
-    {
-      "exactPatterns": ["wedding", "party"],
-      "category": "entertainment",
-      "priority": 9
-    },
-    {
-      "exactPatterns": ["school", "college", "university"],
-      "category": "entertainment",
-      "priority": 9
     },
     {
       "exactPatterns": ["utility", "services"],

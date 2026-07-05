@@ -21,21 +21,24 @@ interface Props {
 interface PermissionState {
   notificationListener: boolean;
   sms: boolean;
+  batteryExempt: boolean;
 }
 
 export const PermissionsSetupScreen: React.FC<Props> = ({ onDone }) => {
   const [perms, setPerms] = useState<PermissionState>({
     notificationListener: false,
     sms: false,
+    batteryExempt: false,
   });
   const appState = useRef(AppState.currentState);
 
   const checkAll = async () => {
-    const [nlEnabled, smsResult] = await Promise.all([
+    const [nlEnabled, smsResult, batteryExempt] = await Promise.all([
       MonfloBridge?.isNotificationListenerEnabled() ?? Promise.resolve(false),
       PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECEIVE_SMS),
+      MonfloBridge?.isIgnoringBatteryOptimizations() ?? Promise.resolve(true),
     ]);
-    setPerms({ notificationListener: nlEnabled, sms: smsResult });
+    setPerms({ notificationListener: nlEnabled, sms: smsResult, batteryExempt });
   };
 
   useEffect(() => {
@@ -61,11 +64,25 @@ export const PermissionsSetupScreen: React.FC<Props> = ({ onDone }) => {
     setPerms(prev => ({ ...prev, sms: granted }));
   };
 
-  const openNotificationSettings = () => {
-    Linking.openSettings();
+  const openNotificationSettings = async () => {
+    // Deep-link to the Notification Access toggle. Falls back to the app's
+    // settings page only if the native intent is unavailable.
+    try {
+      await MonfloBridge?.openNotificationListenerSettings();
+    } catch {
+      Linking.openSettings();
+    }
   };
 
-  const allGranted = perms.notificationListener && perms.sms;
+  const requestBatteryExemption = async () => {
+    try {
+      await MonfloBridge?.requestIgnoreBatteryOptimizations();
+    } catch {
+      Linking.openSettings();
+    }
+  };
+
+  const allGranted = perms.notificationListener && perms.sms && perms.batteryExempt;
 
   return (
     <View style={styles.container}>
@@ -88,6 +105,14 @@ export const PermissionsSetupScreen: React.FC<Props> = ({ onDone }) => {
         granted={perms.sms}
         onPress={requestSms}
         actionLabel="Grant"
+      />
+
+      <PermissionRow
+        label="Unrestricted Battery"
+        description="Stops Android from killing capture in the background"
+        granted={perms.batteryExempt}
+        onPress={requestBatteryExemption}
+        actionLabel="Allow"
       />
 
       <TouchableOpacity

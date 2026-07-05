@@ -19,6 +19,8 @@ const mockBridge = NativeModules.MonfloBridge as {
   saveTransaction: ReturnType<typeof vi.fn>;
 };
 
+const GPAY = 'com.google.android.apps.nbu.paisa.user';
+
 describe('AlertHandshake — runHandshake', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -109,7 +111,76 @@ describe('AlertHandshake — runHandshake', () => {
 
     expect(console.log).toHaveBeenCalledTimes(1);
     expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Parsed transaction: 10000 INR'));
+    // Two saves: the parsed transaction + the unparseable alert kept as raw untagged
+    expect(mockBridge.saveTransaction).toHaveBeenCalledTimes(2);
     expect(mockBridge.clearProcessedAlerts).toHaveBeenCalledWith([1, 2, 3]);
+  });
+
+  it('should save unparseable non-promotional alerts as raw untagged entries', async () => {
+    const rawText = 'Your relationship manager for account XX99 has changed';
+    mockBridge.getPendingAlerts.mockResolvedValue([
+      { id: 7, rawText, packageName: 'sms:VM-HDFCBK-S', timestamp: 1234 },
+    ]);
+    mockBridge.clearProcessedAlerts.mockResolvedValue(undefined);
+
+    await runHandshake();
+
+    expect(mockBridge.saveTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        category: 'untagged',
+        amountPaise: 0,
+        rawText,
+        tags: ['unparsed'],
+        sourcePackage: 'sms:VM-HDFCBK-S',
+      })
+    );
+    expect(mockBridge.clearProcessedAlerts).toHaveBeenCalledWith([7]);
+  });
+});
+
+describe('AlertHandshake — auto-categorization (end to end)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockBridge.clearProcessedAlerts.mockResolvedValue(undefined);
+    mockBridge.saveTransaction.mockResolvedValue(undefined);
+  });
+
+  it('extracts the merchant and auto-categorizes a food payment', async () => {
+    mockBridge.getPendingAlerts.mockResolvedValue([
+      { id: 1, rawText: 'You paid ₹500 to Zomato', packageName: GPAY, timestamp: 1000 },
+    ]);
+
+    await runHandshake();
+
+    expect(mockBridge.saveTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({ merchantName: 'Zomato', category: 'food', amountPaise: 50000 })
+    );
+  });
+
+  it('folds a travel merchant into transport', async () => {
+    mockBridge.getPendingAlerts.mockResolvedValue([
+      { id: 2, rawText: 'You paid ₹1200 to MakeMyTrip', packageName: GPAY, timestamp: 2000 },
+    ]);
+
+    await runHandshake();
+
+    expect(mockBridge.saveTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({ merchantName: 'MakeMyTrip', category: 'transport' })
+    );
+  });
+
+  it('leaves an unknown merchant untagged for manual reconciliation', async () => {
+    mockBridge.getPendingAlerts.mockResolvedValue([
+      { id: 3, rawText: 'You paid ₹100 to Rahul Kumar', packageName: GPAY, timestamp: 3000 },
+    ]);
+
+    await runHandshake();
+
+    expect(mockBridge.saveTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({ merchantName: 'Rahul Kumar', category: 'untagged' })
+    );
   });
 });
 

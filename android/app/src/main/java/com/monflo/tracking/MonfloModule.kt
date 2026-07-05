@@ -1,7 +1,10 @@
 package com.monflo.tracking
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.provider.Settings
 import androidx.core.app.NotificationManagerCompat
 import com.facebook.react.bridge.*
 import kotlinx.coroutines.CoroutineScope
@@ -79,11 +82,12 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
         val prefs = reactApplicationContext.getSharedPreferences("monflo_tracking_prefs", Context.MODE_PRIVATE)
         prefs.edit().putBoolean("isTrackingEnabled", enabled).apply()
 
-        val intent = Intent(reactApplicationContext, MonfloNotificationService::class.java)
         if (enabled) {
-            reactApplicationContext.startForegroundService(intent)
+            CaptureWatchdog.ensureServiceRunning(reactApplicationContext)
+            CaptureWatchdog.schedule(reactApplicationContext)
         } else {
-            reactApplicationContext.stopService(intent)
+            reactApplicationContext.stopService(Intent(reactApplicationContext, MonfloNotificationService::class.java))
+            CaptureWatchdog.cancel(reactApplicationContext)
         }
         promise.resolve(enabled)
     }
@@ -92,6 +96,57 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     fun isTrackingEnabled(promise: Promise) {
         val prefs = reactApplicationContext.getSharedPreferences("monflo_tracking_prefs", Context.MODE_PRIVATE)
         promise.resolve(prefs.getBoolean("isTrackingEnabled", false))
+    }
+
+    // === Capture Health Methods ===
+
+    @ReactMethod
+    fun isNotificationAccessGranted(promise: Promise) {
+        val enabled = NotificationManagerCompat.getEnabledListenerPackages(reactApplicationContext)
+        promise.resolve(enabled.contains(reactApplicationContext.packageName))
+    }
+
+    @ReactMethod
+    fun openNotificationAccessSettings() {
+        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        reactApplicationContext.startActivity(intent)
+    }
+
+    @ReactMethod
+    fun getCaptureHealth(promise: Promise) {
+        try {
+            val ctx = reactApplicationContext
+            val enabled = NotificationManagerCompat.getEnabledListenerPackages(ctx)
+            val result = Arguments.createMap()
+            result.putDouble("lastAliveMs", CaptureHealth.lastAliveMs(ctx).toDouble())
+            result.putDouble("lastListenerConnectedMs", CaptureHealth.lastListenerConnectedMs(ctx).toDouble())
+            result.putBoolean("accessGranted", enabled.contains(ctx.packageName))
+
+            val gapsArray = Arguments.createArray()
+            for (g in CaptureHealth.getGaps(ctx)) {
+                val map = Arguments.createMap()
+                map.putDouble("startMs", g.startMs.toDouble())
+                map.putDouble("endMs", g.endMs.toDouble())
+                map.putString("reason", g.reason)
+                map.putBoolean("acknowledged", g.acknowledged)
+                gapsArray.pushMap(map)
+            }
+            result.putArray("gaps", gapsArray)
+            promise.resolve(result)
+        } catch (e: Exception) {
+            promise.reject("HEALTH_ERROR", e.message)
+        }
+    }
+
+    @ReactMethod
+    fun acknowledgeCaptureGaps(promise: Promise) {
+        try {
+            CaptureHealth.acknowledgeAll(reactApplicationContext)
+            promise.resolve(true)
+        } catch (e: Exception) {
+            promise.reject("HEALTH_ERROR", e.message)
+        }
     }
 
     @ReactMethod
@@ -126,11 +181,59 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
     }
 
     @ReactMethod
+    fun setCaptureMode(mode: String, promise: Promise) {
+        CaptureConfig.setMode(reactApplicationContext, mode)
+        promise.resolve(CaptureConfig.getMode(reactApplicationContext))
+    }
+
+    @ReactMethod
+    fun getCaptureMode(promise: Promise) {
+        promise.resolve(CaptureConfig.getMode(reactApplicationContext))
+    }
+
+    @ReactMethod
     fun isNotificationListenerEnabled(promise: Promise) {
         val enabled = NotificationManagerCompat
             .getEnabledListenerPackages(reactApplicationContext)
             .contains(reactApplicationContext.packageName)
         promise.resolve(enabled)
+    }
+
+    /**
+     * Opens the system Notification Access settings. On Android 11+ this deep-links
+     * straight to Monflo's own listener toggle; older versions land on the full list.
+     * `Linking.openSettings()` from JS only opens the app detail page, which has no
+     * notification-listener toggle — hence this dedicated intent.
+     */
+    @ReactMethod
+    fun openNotificationListenerSettings(promise: Promise) {
+        val ctx = reactApplicationContext
+        try {
+            val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val component = ComponentName(ctx, MonfloNotificationService::class.java)
+                Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS).apply {
+                    putExtra(
+                        Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME,
+                        component.flattenToString()
+                    )
+                }
+            } else {
+                Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+            }
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            ctx.startActivity(intent)
+            promise.resolve(true)
+        } catch (e: Exception) {
+            // Fall back to the generic listener-settings list if the deep link fails
+            try {
+                val fallback = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                fallback.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                ctx.startActivity(fallback)
+                promise.resolve(true)
+            } catch (e2: Exception) {
+                promise.reject("SETTINGS_ERROR", e2.message)
+            }
+        }
     }
 
     // === Accounting Methods ===
@@ -188,6 +291,19 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
         }
     }
 
+    @ReactMethod
+    fun deleteTransaction(txId: String, promise: Promise) {
+        scope.launch {
+            try {
+                val database = NativeDatabase.getInstance(reactApplicationContext)
+                database.processedTransactionDao().delete(txId)
+                promise.resolve(true)
+            } catch (e: Exception) {
+                promise.reject("DB_ERROR", e.message)
+            }
+        }
+    }
+
     // === Rule Methods ===
 
     @ReactMethod
@@ -233,6 +349,83 @@ class MonfloModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
             } catch (e: Exception) {
                 promise.reject("DB_ERROR", e.message)
             }
+        }
+    }
+
+    // === Simulator Methods (dev only) ===
+
+    @ReactMethod
+    fun injectTestAlert(rawText: String, packageName: String, promise: Promise) {
+        scope.launch {
+            try {
+                NativeDatabase.getInstance(reactApplicationContext).rawAlertDao().insert(
+                    RawAlert(rawText = rawText, packageName = packageName, timestamp = System.currentTimeMillis())
+                )
+                promise.resolve(true)
+            } catch (e: Exception) {
+                promise.reject("DB_ERROR", e.message)
+            }
+        }
+    }
+
+    // Posts a REAL heads-up notification (HIGH-importance channel) so it shows in the
+    // notification shade AND as a pop-up. Note: packageName is always com.monflo — the OS
+    // won't let an app post "as" another app — so per-app parser routing is tested via
+    // injectTestAlert instead. This method is purely for visual notification realism.
+    @ReactMethod
+    fun postTestNotification(title: String, body: String, promise: Promise) {
+        try {
+            val ctx = reactApplicationContext
+            val nm = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+            val channelId = "monflo_sim_alerts"
+            nm.createNotificationChannel(
+                android.app.NotificationChannel(
+                    channelId, "Monflo Simulator", android.app.NotificationManager.IMPORTANCE_HIGH
+                )
+            )
+            nm.notify(
+                System.currentTimeMillis().toInt(),
+                android.app.Notification.Builder(ctx, channelId)
+                    .setContentTitle(title)
+                    .setContentText(body)
+                    .setStyle(android.app.Notification.BigTextStyle().bigText(body))
+                    .setSmallIcon(android.R.drawable.ic_dialog_email)
+                    .setPriority(android.app.Notification.PRIORITY_HIGH)
+                    .setAutoCancel(true)
+                    .build()
+            )
+            promise.resolve(true)
+        } catch (e: Exception) {
+            promise.reject("NOTIF_ERROR", e.message)
+        }
+    }
+
+    // === Capture Reliability Methods ===
+
+    @ReactMethod
+    fun isIgnoringBatteryOptimizations(promise: Promise) {
+        val ctx = reactApplicationContext
+        val pm = ctx.getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+        promise.resolve(pm.isIgnoringBatteryOptimizations(ctx.packageName))
+    }
+
+    /**
+     * Requests exemption from Doze/App Standby battery optimization. Without this,
+     * OEM power managers (Xiaomi/Samsung/Oppo/Vivo) are far more likely to kill the
+     * notification listener process outright, silently ending capture.
+     */
+    @ReactMethod
+    fun requestIgnoreBatteryOptimizations(promise: Promise) {
+        val ctx = reactApplicationContext
+        try {
+            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                data = android.net.Uri.parse("package:${ctx.packageName}")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            ctx.startActivity(intent)
+            promise.resolve(true)
+        } catch (e: Exception) {
+            promise.reject("BATTERY_SETTINGS_ERROR", e.message)
         }
     }
 

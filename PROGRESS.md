@@ -20,6 +20,9 @@
 | **TRAI Compliance** | ✅ IMPLEMENTED | Header suffix analysis (DLT) | P0 |
 | **UPI & Wallet Alerts Capture** | ✅ TESTED | 11 package-specific unit tests | P0 |
 | **Monochrome UI (V1)** | ✅ IMPLEMENTED | Live dashboard + feed | P1 |
+| **Manual Transaction Entry** | ✅ TESTED | 5 unit tests (paise validation, sign, wallet math) | P1 |
+| **Hand Cash Wallet** | ✅ IMPLEMENTED | Running balance + today's cash spend on Dashboard | P1 |
+| **Edit / Delete Transaction** | ✅ IMPLEMENTED | Long-press → edit (manual/cash) or delete (any); `deleteTransaction` bridge | P1 |
 | **iOS Automation (Shortcut)** | ✅ TESTED | Receiver + production parser integration | P0 |
 | **Merchant Detector** | ✅ TESTED | Trie + fuzzy matching, 50+ merchants, 26 tests | P0 |
 | **Android SMS Bridge** | ✅ TESTED | POSTs to Mac receiver, offline retry queue | P0 |
@@ -51,6 +54,9 @@
 - [x] **GPay Package Fix:** Corrected notification allowlist + simulator preset to `com.google.android.apps.nbu.paisa.user` (matches `GPAY_PACKAGE`); GPay alerts now pass the allowlist and route to the gpay_paid template.
 - [x] **Capture Reliability Engine:** Closes the biggest silent-failure risk in the app — OEM battery killers (Xiaomi/Samsung/Oppo/Vivo) routinely kill `NotificationListenerService` processes with no OS-level restart, silently ending capture with no visible sign. Layers: (1) `onListenerConnected`/`onListenerDisconnected` override with `requestRebind()`, plus a backfill of any alerts still on-screen via `activeNotifications` on reconnect; (2) `CaptureHealth` (SharedPreferences-backed) distinguishes a background-suppression gap from an access-revoked gap, keeping a capped history of both; (3) `CaptureWatchdog`/`CaptureWatchdogWorker` (WorkManager, 15-min periodic + immediate kick from `onDestroy`/`onTaskRemoved`) re-arms the foreground service; (4) `requestIgnoreBatteryOptimizations` bridge method + "Unrestricted Battery" row in `PermissionsSetupScreen` — the actual root-cause fix, since Doze/App Standby exemption stops most OEM kills before they happen. `Dashboard` surfaces a gap-reason banner (reusing the existing fetch/refresh cadence) that routes to permissions setup or acknowledges the gap.
 - [x] **Auto-Categorization Engine:** On-device keyword categorizer (`TransactionCategorizer.ts`) maps each parsed transaction into the existing 7-category taxonomy (groceries→food, travel→transport) from merchant name **and** raw alert text. Wired into the handshake; unmatched merchants stay `untagged` for the Untagged Bucket rather than guessing.
+- [x] **Manual Transaction Entry:** General "+" FAB adds an expense/income manually. Pure `ManualEntry.ts` money logic (paise validation at the boundary, signed amounts), reuses the existing `saveTransaction` bridge — no native schema change. 5 unit tests.
+- [x] **Hand Cash Wallet:** Dashboard card showing cash-on-hand (top-ups minus spends) + today's cash spend. "Add cash" logs a top-up or cash spend (`sourcePackage: 'cash'`).
+- [x] **Edit / Delete:** Long-press a transaction → Edit (manual/cash entries, replaces the row via `saveTransaction` + `onConflict=REPLACE`) or Delete (any entry, via new `deleteTransaction` bridge → existing DAO `delete`).
 
 ### 🟡 Improvement Needed / Tech Debt
 - [ ] **Notification Simulator — device verify:** Built (10 presets: 5 UPI apps + 5 bank SMS). Tap row → inline parse (dedup cleared so re-parse works); 🔔 → real heads-up notification (HIGH-importance channel + POST_NOTIFICATIONS) + DB inject for accurate per-app parse in Live Monitor. Requires APK rebuild; pending on-device confirmation.
@@ -108,6 +114,8 @@
 | 2026-06-27 | **Tracking** | Notification Simulator: 🔔 posts a real heads-up notification AND injects to DB with the correct package. Android won't let an app post "as" PhonePe (pkg is always com.monflo), so per-app routing is tested via the inject path, not the live notification. | Medium (Testability) |
 | 2026-06-27 | **Tracking** | Clear `Deduplicator` before each inline simulator parse. Parser dedupes any sourcePackage≠'app' within a 5-min window, so re-parsing the same preset returned null (false "PARSE FAILED"). | Medium (DevEx) |
 | 2026-06-27 | **Android** | Fix GPay package to `com.google.android.apps.nbu.paisa.user` in AlertFilter allowlist + simulator preset (was missing `.user`, so GPay alerts were dropped at the allowlist and never reached the gpay template). | High (Accuracy) |
+| 2026-07-04 | **Accounting** | Manual entries + cash wallet reuse `ProcessedTransaction` + `saveTransaction` (discriminated by `sourcePackage: 'cash' \| 'manual'`). No native schema change. | High (Simplicity) |
+| 2026-07-04 | **Accounting** | Edit = re-save with same id (`onConflict=REPLACE`); no separate update bridge. Delete = new `deleteTransaction` bridge → existing DAO `delete`. | Medium (Correctness) |
 | 2026-06-24 | **Android** | Android SMS bridge POSTs to same Mac receiver as iOS. Offline retry queue handles connectivity gracefully. | High (Parity, Reliability) |
 | 2026-06-24 | **Accounting** | Merchant detection uses Trie + Levenshtein (not regex). Avoids backtracking; scales to 1000s merchants offline. | High (Performance, Reliability) |
 | 2026-06-24 | **iOS** | iOS Shortcut receiver uses UniversalParser (not throwaway regex); durable raw log before parsing. | High (Accuracy, Reliability) |

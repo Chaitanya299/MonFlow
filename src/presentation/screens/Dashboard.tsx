@@ -10,7 +10,9 @@ import {
 } from 'react-native';
 import { NativeAccountingRepository } from '../../domain/accounting/NativeAccountingRepository';
 import { ProcessedTransaction, DailySummary } from '../../domain/accounting/types';
+import { computeCashWallet, CashWallet } from '../../domain/accounting/ManualEntry';
 import { TransactionItem } from '../components/TransactionItem';
+import { AddTransactionModal, AddTxnConfig } from '../components/AddTransactionModal';
 import { runHandshake } from '../../domain/tracking/AlertHandshake';
 import {
   getCaptureHealth,
@@ -21,6 +23,9 @@ import {
 } from '../../domain/tracking/CaptureHealth';
 
 const repository = new NativeAccountingRepository();
+
+const CASH_CONFIG: AddTxnConfig = { title: 'Add Cash', sourcePackage: 'cash', outLabel: 'Spent', inLabel: 'Top-up' };
+const GENERAL_CONFIG: AddTxnConfig = { title: 'Add Transaction', sourcePackage: 'manual', outLabel: 'Expense', inLabel: 'Income' };
 
 interface Props {
   onOpenUntagged: () => void;
@@ -44,10 +49,32 @@ export const Dashboard: React.FC<Props> = ({ onOpenUntagged, onOpenDevTest, onOp
   const [transactions, setTransactions] = useState<ProcessedTransaction[]>([]);
   const [summary, setSummary] = useState<DailySummary | null>(null);
   const [untaggedCount, setUntaggedCount] = useState(0);
+  const [cashWallet, setCashWallet] = useState<CashWallet>({ balancePaise: 0, todaySpentPaise: 0 });
+  const [activeModal, setActiveModal] = useState<AddTxnConfig | null>(null);
+  const [editTx, setEditTx] = useState<ProcessedTransaction | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [captureWarning, setCaptureWarning] = useState<string | null>(null);
   const [captureNeedsFix, setCaptureNeedsFix] = useState(false);
+
+  const handleEdit = (tx: ProcessedTransaction) => {
+    setEditTx(tx);
+    setActiveModal(tx.sourcePackage === 'cash' ? CASH_CONFIG : GENERAL_CONFIG);
+  };
+
+  const handleDelete = async (tx: ProcessedTransaction) => {
+    try {
+      await repository.delete(tx.id);
+      await fetchData();
+    } catch (e) {
+      console.error('Failed to delete transaction:', e);
+    }
+  };
+
+  const closeModal = () => {
+    setActiveModal(null);
+    setEditTx(null);
+  };
 
   const fetchData = async () => {
     try {
@@ -64,15 +91,18 @@ export const Dashboard: React.FC<Props> = ({ onOpenUntagged, onOpenDevTest, onOp
       const now = new Date();
       const todayStr = now.toISOString().split('T')[0];
 
-      const [txs, daySummary, untagged] = await Promise.all([
+      const [txs, daySummary, untagged, allTxs] = await Promise.all([
         repository.getByDateRange(now.getTime() - 7 * 24 * 60 * 60 * 1000, now.getTime() + 10000),
         repository.getDailySummary(todayStr),
         repository.getUntagged(),
+        // cash balance is all-time, not the 7-day window
+        repository.getByDateRange(0, now.getTime() + 10000),
       ]);
 
       setTransactions(txs);
       setSummary(daySummary);
       setUntaggedCount(untagged.length);
+      setCashWallet(computeCashWallet(allTxs.filter(t => t.sourcePackage === 'cash'), now.getTime()));
     } catch (e) {
       console.error('Failed to fetch dashboard data:', e);
     } finally {
@@ -137,6 +167,17 @@ export const Dashboard: React.FC<Props> = ({ onOpenUntagged, onOpenDevTest, onOp
         </View>
       </View>
 
+      <View style={styles.cashCard}>
+        <View style={styles.cashLeft}>
+          <Text style={styles.cashLabel}>HAND CASH</Text>
+          <Text style={styles.cashBalance}>₹{(cashWallet.balancePaise / 100).toFixed(2)}</Text>
+          <Text style={styles.cashSub}>₹{(cashWallet.todaySpentPaise / 100).toFixed(2)} spent today</Text>
+        </View>
+        <TouchableOpacity style={styles.cashAddButton} onPress={() => setActiveModal(CASH_CONFIG)}>
+          <Text style={styles.cashAddText}>+ Add cash</Text>
+        </TouchableOpacity>
+      </View>
+
       {untaggedCount > 0 && (
         <TouchableOpacity style={styles.alertBanner} onPress={onOpenUntagged}>
           <Text style={styles.alertText}>
@@ -151,7 +192,9 @@ export const Dashboard: React.FC<Props> = ({ onOpenUntagged, onOpenDevTest, onOp
       <FlatList
         data={transactions}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <TransactionItem transaction={item} />}
+        renderItem={({ item }) => (
+          <TransactionItem transaction={item} onEdit={handleEdit} onDelete={handleDelete} />
+        )}
         contentContainerStyle={styles.list}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} color="#000000" />
@@ -163,6 +206,20 @@ export const Dashboard: React.FC<Props> = ({ onOpenUntagged, onOpenDevTest, onOp
           </View>
         }
       />
+
+      <TouchableOpacity style={styles.fab} onPress={() => setActiveModal(GENERAL_CONFIG)}>
+        <Text style={styles.fabText}>+</Text>
+      </TouchableOpacity>
+
+      {activeModal && (
+        <AddTransactionModal
+          config={activeModal}
+          visible={true}
+          onClose={closeModal}
+          onSaved={fetchData}
+          editTx={editTx ?? undefined}
+        />
+      )}
     </View>
   );
 };
@@ -224,6 +281,67 @@ const styles = StyleSheet.create({
   summarySubtext: {
     fontSize: 12,
     color: '#888888',
+  },
+  cashCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
+  },
+  cashLeft: {
+    flex: 1,
+  },
+  cashLabel: {
+    fontSize: 10,
+    color: '#888888',
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+  cashBalance: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginVertical: 4,
+  },
+  cashSub: {
+    fontSize: 12,
+    color: '#888888',
+  },
+  cashAddButton: {
+    backgroundColor: '#1a1a1a',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  cashAddText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  fab: {
+    position: 'absolute',
+    right: 24,
+    bottom: 32,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#000000',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+  },
+  fabText: {
+    color: '#FFFFFF',
+    fontSize: 30,
+    fontWeight: '300',
+    marginTop: -2,
   },
   alertBanner: {
     backgroundColor: '#fff3e0',

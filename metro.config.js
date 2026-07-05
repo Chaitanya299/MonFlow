@@ -7,23 +7,21 @@ const path = require('path');
  *
  * @type {import('@react-native/metro-config').MetroConfig}
  */
-
-// The social / P2P sync context pulls in @waku/sdk (libp2p) and
-// @automerge/automerge (WASM). Both are statically imported via
-// GroupInviteScreen, so Metro drags them into the startup bundle even though
-// that screen only renders on a pending invite. Neither bundles for Hermes
-// without significant polyfilling, and the social feature is deprioritized — so
-// we redirect those two packages to a stub (src/dev/socialBundleStub.js) at
-// bundle time. The Dashboard and on-device test runner build and run normally.
-// Remove these entries to re-enable real bundling once those libs are RN-ready.
-const STUBBED_MODULES = new Set(['@waku/sdk', '@automerge/automerge']);
-const STUB_PATH = path.resolve(__dirname, 'src/dev/socialBundleStub.js');
-
 const config = {
   resolver: {
+    // @waku/sdk and its libp2p deps are ESM packages that declare their real
+    // entry points via the "exports" map, not a resolvable "main" field.
+    unstable_enablePackageExports: true,
+    // Test build: @waku/sdk (libp2p) and @automerge/automerge (WASM) do not
+    // bundle for RN. Both are only reachable via GroupInviteScreen (the P2P
+    // bill-split sync), which is irrelevant to the notification-listener test.
+    // Redirect them to an inert stub so the app compiles + boots.
     resolveRequest: (context, moduleName, platform) => {
-      if (STUBBED_MODULES.has(moduleName)) {
-        return {type: 'sourceFile', filePath: STUB_PATH};
+      if (moduleName.startsWith('@waku/') || moduleName.startsWith('@automerge/')) {
+        return {
+          type: 'sourceFile',
+          filePath: path.resolve(__dirname, 'metro-stubs/empty-sync.js'),
+        };
       }
       return context.resolveRequest(context, moduleName, platform);
     },
